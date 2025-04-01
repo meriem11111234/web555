@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil</title>
+</head>
+<body>
+    <h1>Bienvenue sur la plateforme de planification de réunions</h1>
+    <% if (user) { %>
+        <p>Connecté en tant que <%= user.email %> (<%= user.role %>)</p>
+        <a href="/dashboard">Aller au tableau de bord</a>
+        <a href="/logout">Déconnexion</a>
+    <% } else { %>
+        <a href="/login">Se connecter</a> | <a href="/register">S'inscrire</a>
+    <% } %>
+</body>
+</html>

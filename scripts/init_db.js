@@ -12,7 +12,7 @@ const client = new Client({
 client.connect()
     .then(() => {
         // Lire le fichier 
-        const sql = fs.readFileSync("./src/scripts/init_db_sql", "utf8");
+        const sql = fs.readFileSync("./scripts/init_db.sql", "utf8");
 
         // Exécuter le fichier SQL
         return client.query(sql);
