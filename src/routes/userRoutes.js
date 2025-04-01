@@ -1,6 +1,4 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const pool = require("../config/db");  // Assure-toi que la connexion à PostgreSQL fonctionne bien
 const router = express.Router();
 
@@ -28,16 +26,16 @@ router.post("/register", async (req, res) => {
             });
         }
 
-        // Hasher le mot de passe
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // ne pas Hasher le mot de passe
+        const plainPassword = password;
 
         // Enregistrer l'utilisateur dans la base de données
         const newUser = await pool.query(
             "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING *",
-            [email, hashedPassword, role]
+            [email, plainPassword, role]
         );
 
-    
+        console.log("Utilisateur créé avec mot de passe en clair :", newUser.rows[0]);
 
         // Envoyer la réponse
         res.status(201).redirect("/login");  // Redirection vers la page de connexion après l'inscription
@@ -51,6 +49,7 @@ router.post("/register", async (req, res) => {
     }
 });
 
+// Route de connexion
 // Route de connexion
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
@@ -67,15 +66,11 @@ router.post("/login", async (req, res) => {
         }
 
         const user = result.rows[0];
-        console.log("Mot de passe haché stocké dans la base de données :", user.password);  // Log du mot de passe haché
 
-        // Vérifier le mot de passe
-        const isMatch = await bcrypt.compare(password, user.password);
-        console.log("Mot de passe saisi :", password);  // Log du mot de passe saisi
-        console.log("Match du mot de passe :", isMatch);  // Log de la comparaison
+        // Comparer directement le mot de passe en clair saisi avec le mot de passe en clair stocké
+        console.log("Mot de passe stocké en clair dans la base de données :", user.password);
 
-        if (!isMatch) {
-            console.log("Mot de passe incorrect.");  // Log si le mot de passe est incorrect
+        if (password !== user.password) {
             return res.status(400).render("index", { 
                 page: 'login', 
                 error: "Mot de passe incorrect" 
@@ -94,6 +89,7 @@ router.post("/login", async (req, res) => {
         });
     }
 });
+
 
 
 // Route pour le tableau de bord
