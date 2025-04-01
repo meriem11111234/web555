@@ -3,16 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accueil</title>
+    <title>Plateforme de Planification de Réunions</title>
+    <link rel="stylesheet" href="/public/styles.css">
 </head>
 <body>
-    <h1>Bienvenue sur la plateforme de planification de réunions</h1>
-    <% if (user) { %>
-        <p>Connecté en tant que <%= user.email %> (<%= user.role %>)</p>
-        <a href="/dashboard">Aller au tableau de bord</a>
+    <!-- Accueil -->
+    <% if (page === 'home') { %>
+        <h1>Bienvenue sur la plateforme de planification de réunions</h1>
+        <% if (user) { %>
+            <p>Connecté en tant que <%= user.email %> (<%= user.role %>)</p>
+            <a href="/dashboard">Aller au tableau de bord</a>
+            <a href="/logout">Déconnexion</a>
+        <% } else { %>
+            <a href="/login">Se connecter</a> | <a href="/register">S'inscrire</a>
+        <% } %>
+    <% } %>
+
+    <!-- Connexion -->
+    <% if (page === 'login') { %>
+        <h2>Connexion</h2>
+        <% if (error) { %>
+            <p style="color: red;"><%= error %></p>
+        <% } %>
+        <form action="/login" method="POST">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <button type="submit">Se connecter</button>
+        </form>
+        <p>Pas encore inscrit ? <a href="/register">Inscrivez-vous ici</a></p>
+    <% } %>
+
+    <!-- Inscription -->
+    <% if (page === 'register') { %>
+        <h2>Inscription</h2>
+        <form action="/api/users/register" method="POST">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <select name="role">
+                <option value="organisateur">Organisateur</option>
+                <option value="participant">Participant</option>
+            </select>
+            <button type="submit">S'inscrire</button>
+        </form>
+    <% } %>
+
+    <!-- Tableau de bord -->
+    <% if (page === 'dashboard' && user) { %>
+        <h1>Tableau de bord</h1>
+        <p>Bienvenue, <%= user.email %> !</p>
+        <p>Votre rôle : <%= user.role %></p>
         <a href="/logout">Déconnexion</a>
-    <% } else { %>
-        <a href="/login">Se connecter</a> | <a href="/register">S'inscrire</a>
     <% } %>
 </body>
 </html>

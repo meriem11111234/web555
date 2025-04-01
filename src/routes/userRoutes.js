@@ -12,14 +12,20 @@ router.post("/register", async (req, res) => {
 
     // Vérification des données
     if (!email || !password || !role) {
-        return res.status(400).render("register", { error: "Tous les champs sont requis !" });
+        return res.status(400).render("index", { 
+            page: 'register', // Passer la variable page avec 'register'
+            error: "Tous les champs sont requis !" 
+        });
     }
 
     try {
         // Vérifier si l'email est déjà utilisé
         const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
         if (result.rows.length > 0) {
-            return res.status(400).render("register", { error: "Cet email est déjà utilisé !" });
+            return res.status(400).render("index", { 
+                page: 'register', // Passer la variable page avec 'register'
+                error: "Cet email est déjà utilisé !" 
+            });
         }
 
         // Hasher le mot de passe
@@ -30,7 +36,7 @@ router.post("/register", async (req, res) => {
             "INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING *",
             [email, hashedPassword, role]
         );
-        
+
         // Créer un token JWT
         const token = jwt.sign({ id: newUser.rows[0].id }, process.env.JWT_SECRET, {
             expiresIn: "1h",
@@ -41,8 +47,64 @@ router.post("/register", async (req, res) => {
 
     } catch (error) {
         console.error("Erreur lors de l'inscription :", error);
-        res.status(500).render("register", { error: "Erreur interne du serveur !" });
+        res.status(500).render("index", { 
+            page: 'register', // Passer la variable page avec 'register'
+            error: "Erreur interne du serveur !" 
+        });
     }
+});
+
+// Route de connexion
+router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        if (result.rows.length === 0) {
+            return res.status(400).render("index", { 
+                page: 'login', // Passer la variable page avec 'login'
+                error: "Utilisateur non trouvé" 
+            });
+        }
+
+        const user = result.rows[0];
+
+        // Vérifier le mot de passe
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).render("index", { 
+                page: 'login', // Passer la variable page avec 'login'
+                error: "Mot de passe incorrect" 
+            });
+        }
+
+        // Ajouter l'utilisateur à la session
+        req.session.user = user;
+        res.redirect("/dashboard");
+
+    } catch (error) {
+        console.error("Erreur lors de la connexion :", error);
+        res.status(500).render("index", { 
+            page: 'login', // Passer la variable page avec 'login'
+            error: "Erreur interne du serveur" 
+        });
+    }
+});
+
+// Route pour le tableau de bord
+router.get("/dashboard", (req, res) => {
+    if (!req.session.user) return res.redirect("/login");
+    res.render("index", { 
+        page: 'dashboard', // Passer la variable page avec 'dashboard'
+        user: req.session.user
+    });
+});
+
+// Route de déconnexion
+router.get("/logout", (req, res) => {
+    req.session.destroy(() => {
+        res.redirect("/");
+    });
 });
 
 module.exports = router;

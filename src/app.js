@@ -40,14 +40,37 @@ app.use(authRoutes);
 
 // Page d'accueil
 app.get("/", (req, res) => {
-    res.render("index", { user: req.session.user });
+    res.render("index", { title: "Accueil", page: "home", user: req.session.user });
+});
+
+// Route pour afficher la page de connexion
+app.get("/login", (req, res) => {
+    res.render("index", { title: "Connexion", page: "login", error: null });
 });
 
 // Route pour afficher la page d'inscription
 app.get("/register", (req, res) => {
-    res.render("register");
+    res.render("index", { title: "Inscription", page: "register" });
 });
 
+// Route pour afficher le tableau de bord
+app.get("/dashboard", (req, res) => {
+    if (req.session.user) {
+        res.render("index", { title: "Tableau de bord", page: "dashboard", user: req.session.user });
+    } else {
+        res.redirect("/login");
+    }
+});
+
+// Route pour se déconnecter
+app.get("/logout", (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.send("Erreur lors de la déconnexion");
+        }
+        res.redirect("/"); // Rediriger à la page d'accueil après déconnexion
+    });
+});
 
 // Lancer le serveur sur un port aléatoire
 const server = app.listen(0, () => { 
