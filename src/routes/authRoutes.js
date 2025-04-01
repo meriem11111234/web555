@@ -45,18 +45,41 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log("Tentative de connexion pour l'email :", email);  // Affiche l'email de l'utilisateur qui tente de se connecter
+
+        // Recherche de l'utilisateur par email dans la base de données
         const user = await User.findByEmail(email);
-        if (!user) return res.render("index", { page: 'login', error: "Utilisateur non trouvé" });
 
+        // Si l'utilisateur n'existe pas
+        if (!user) {
+            console.log("Utilisateur non trouvé pour l'email :", email);  // Affiche que l'utilisateur n'a pas été trouvé
+            return res.render("index", { page: 'login', error: "Utilisateur non trouvé" });
+        }
+
+        // Affichage du mot de passe stocké (haché) dans la base de données
+        console.log("Mot de passe stocké (haché) dans la base de données :", user.password);
+
+        // Comparaison du mot de passe fourni avec celui stocké dans la base de données
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.render("index", { page: 'login', error: "Mot de passe incorrect" });
 
+        // Si les mots de passe ne correspondent pas
+        if (!isMatch) {
+            console.log("Le mot de passe saisi ne correspond pas au mot de passe stocké.");  // Affiche que le mot de passe ne correspond pas
+            return res.render("index", { page: 'login', error: "Mot de passe incorrect" });
+        }
+
+        // Si tout est correct, on crée une session pour l'utilisateur
+        console.log("Connexion réussie pour l'utilisateur :", email);
         req.session.user = user;
+
+        // Redirection vers le tableau de bord
         res.redirect("/dashboard");
     } catch (error) {
+        console.error("Erreur lors de la tentative de connexion :", error);  // Affiche l'erreur s'il y en a une
         res.render("index", { page: 'login', error: "Erreur serveur" });
     }
 });
+
 
 // Route pour afficher le tableau de bord
 router.get("/dashboard", (req, res) => {

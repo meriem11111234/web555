@@ -37,10 +37,7 @@ router.post("/register", async (req, res) => {
             [email, hashedPassword, role]
         );
 
-        // Créer un token JWT
-        const token = jwt.sign({ id: newUser.rows[0].id }, process.env.JWT_SECRET, {
-            expiresIn: "1h",
-        });
+    
 
         // Envoyer la réponse
         res.status(201).redirect("/login");  // Redirection vers la page de connexion après l'inscription
@@ -59,21 +56,28 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        console.log("Tentative de connexion pour l'email :", email);  // Afficher l'email pour déboguer
         const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
         if (result.rows.length === 0) {
+            console.log("Aucun utilisateur trouvé pour cet email.");  // Log si l'utilisateur n'existe pas
             return res.status(400).render("index", { 
-                page: 'login', // Passer la variable page avec 'login'
+                page: 'login',
                 error: "Utilisateur non trouvé" 
             });
         }
 
         const user = result.rows[0];
+        console.log("Mot de passe haché stocké dans la base de données :", user.password);  // Log du mot de passe haché
 
         // Vérifier le mot de passe
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log("Mot de passe saisi :", password);  // Log du mot de passe saisi
+        console.log("Match du mot de passe :", isMatch);  // Log de la comparaison
+
         if (!isMatch) {
+            console.log("Mot de passe incorrect.");  // Log si le mot de passe est incorrect
             return res.status(400).render("index", { 
-                page: 'login', // Passer la variable page avec 'login'
+                page: 'login', 
                 error: "Mot de passe incorrect" 
             });
         }
@@ -85,11 +89,12 @@ router.post("/login", async (req, res) => {
     } catch (error) {
         console.error("Erreur lors de la connexion :", error);
         res.status(500).render("index", { 
-            page: 'login', // Passer la variable page avec 'login'
+            page: 'login', 
             error: "Erreur interne du serveur" 
         });
     }
 });
+
 
 // Route pour le tableau de bord
 router.get("/dashboard", (req, res) => {
