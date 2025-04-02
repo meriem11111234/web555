@@ -1,131 +1,189 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plateforme de Planification de Réunions</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/common.css" />
+    <link rel="stylesheet" href="/style1.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
-    >
+    />
   </head>
   <body>
     <div class="background">
       <div class="container">
-        
         <!-- Page d'accueil -->
         <% if (page === 'home') { %>
-          <h1>Bienvenue sur la plateforme de planification de réunions</h1>
-          <% if (user) { %>
-            <p>Connecté en tant que <%= user.email %> (<%= user.role %>)</p>
-            <a href="/dashboard" class="button">Aller au tableau de bord</a>
-            <a href="/logout" class="button">Déconnexion</a>
-          <% } else { %>
-            <div class="button-container">
-              <a href="/login" class="button">Se connecter</a>
-              <a href="/register" class="button">S'inscrire</a>
-            </div>
-          <% } %>
-        <% } %>
+        <h1>Bienvenue sur la plateforme de planification de réunions</h1>
+        <% if (user) { %>
+        <p>Connecté en tant que <%= user.email %> (<%= user.role %>)</p>
+        <a href="/dashboard" class="button">Aller au tableau de bord</a>
+        <a href="/logout" class="button">Déconnexion</a>
+        <% } else { %>
+        <div class="button-container">
+          <a href="/login" class="button">Se connecter</a>
+          <a href="/register" class="button">S'inscrire</a>
+        </div>
+        <% } %> <% } %>
 
         <!-- Page de connexion -->
         <% if (page === 'login') { %>
-          <h2>Connexion</h2>
-          <% if (error) { %>
-            <p class="error-message"><%= error %></p>
-          <% } %>
-          <form action="/login" method="POST" class="form-container">
-            <input type="email" name="email" placeholder="Email" required class="input-field">
-            <input type="password" name="password" placeholder="Mot de passe" required class="input-field">
-            <button type="submit" class="button">Se connecter</button>
-          </form>
-          <p>Pas encore inscrit ? <a href="/register">Inscrivez-vous ici</a></p>
+        <h2>Connexion</h2>
+        <% if (error) { %>
+        <p class="error-message"><%= error %></p>
+        <% } %>
+        <form action="/login" method="POST" class="form-container">
+          <input type="email" name="email" placeholder="Email" required class="input-field" />
+          <input
+            type="password"
+            name="password"
+            placeholder="Mot de passe"
+            required
+            class="input-field"
+          />
+          <button type="submit" class="button">Se connecter</button>
+        </form>
+        <p>Pas encore inscrit ? <a href="/register">Inscrivez-vous ici</a></p>
         <% } %>
 
         <!-- Page d'inscription -->
         <% if (page === 'register') { %>
-          <h2>Inscription</h2>
-          <form action="/api/users/register" method="POST" class="form-container">
-            <table>
-              <tr>
-                <td><input type="text" name="last" placeholder="Nom" required class="input-field"></td>
-                <td><input type="text" name="first" placeholder="Prénom" required class="input-field"></td>
-              </tr>
-              <tr>
-                <td colspan="2"><input type="email" name="email" placeholder="Email" required class="input-field"></td>
-              </tr>
-              <tr>
-                <td colspan="2"><input type="password" name="password" placeholder="Mot de passe" required class="input-field"></td>
-              </tr>
-              <tr>
-                <td colspan="2">
-                  <select name="role" class="input-field">
-                    <option value="organisateur">Organisateur</option>
-                    <option value="participant">Participant</option>
-                  </select>
-                </td>
-              </tr>
-            </table>
-            <button type="submit" class="button">S'inscrire</button>
-          </form>
+        <h2>Inscription</h2>
+        <form action="/api/users/register" method="POST" class="form-container">
+          <table>
+            <tr>
+              <td>
+                <input type="text" name="last" placeholder="Nom" required class="input-field" />
+              </td>
+              <td>
+                <input type="text" name="first" placeholder="Prénom" required class="input-field" />
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <input type="email" name="email" placeholder="Email" required class="input-field" />
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Mot de passe"
+                  required
+                  class="input-field"
+                  minlength="8"
+                />
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <select name="role" class="input-field">
+                  <option value="organisateur">Organisateur</option>
+                  <option value="participant">Participant</option>
+                </select>
+              </td>
+            </tr>
+          </table>
+          <button type="submit" class="button">S'inscrire</button>
+        </form>
         <% } %>
 
         <!-- Tableau de bord -->
         <% if (page === 'dashboard' && user) { %>
-          <h1>Tableau de bord</h1>
-          <p>Bienvenue, <%= user.email %> !</p>
-          <p>Votre rôle : <%= user.role %></p>
+        <h1>Tableau de bord</h1>
+        <p>Bienvenue, <%= user.email %> !</p>
+        <p>Votre rôle : <%= user.role %></p>
 
-          <!-- Boutons de gestion des réunions -->
-          <a href="/create-meeting" class="button">Créer une réunion</a>
-          <a href="/join-meeting" class="button">Rejoindre une réunion</a>
-          <a href="/logout" class="button">Déconnexion</a>
+        <!-- Boutons de gestion des réunions -->
+        <a href="/create-meeting" class="button">Créer une réunion</a>
+        <a href="/join-meeting" class="button">Rejoindre une réunion</a>
+        <a href="" class="button" data-bs-toggle="modal" data-bs-target="#logoutModal"
+          >Déconnexion</a
+        >
         <% } %>
 
         <!-- Page pour créer une réunion -->
         <% if (page === 'create-meeting' && user) { %>
-          <h2>Créer une réunion</h2>
-          <p>Un lien unique sera généré pour inviter d'autres utilisateurs.</p>
-          <form action="/api/meetings" method="POST">
-            <input type="text" name="title" placeholder="Titre de la réunion" required class="input-field">
-            <textarea name="description" placeholder="Description" required class="input-field"></textarea>
-            <button type="submit" class="button">Créer la réunion</button>
-          </form>
-          <a href="/dashboard" class="button">Retour</a>
+        <h2>Créer une réunion</h2>
+        <p>Un lien unique sera généré pour inviter d'autres utilisateurs.</p>
+        <form action="/api/meetings" method="POST">
+          <input
+            type="text"
+            name="title"
+            placeholder="Titre de la réunion"
+            required
+            class="input-field"
+          />
+          <textarea
+            name="description"
+            placeholder="Description"
+            required
+            class="input-field"
+          ></textarea>
+          <button type="submit" class="button">Créer la réunion</button>
+        </form>
+        <a href="/dashboard" class="button">Retour</a>
         <% } %>
 
         <!-- Page pour rejoindre une réunion -->
         <% if (page === 'join-meeting' && user) { %>
-          <h2>Rejoindre une réunion</h2>
-          <form action="/api/join-meeting" method="POST">
-            <input type="text" name="meetingId" placeholder="Entrez le code de la réunion" required class="input-field">
-            <button type="submit" class="button">Rejoindre</button>
-          </form>
-          <a href="/dashboard" class="button">Retour</a>
+        <h2>Rejoindre une réunion</h2>
+        <form action="/api/join-meeting" method="POST">
+          <input
+            type="text"
+            name="meetingId"
+            placeholder="Entrez le code de la réunion"
+            required
+            class="input-field"
+          />
+          <button type="submit" class="button">Rejoindre</button>
+        </form>
+        <a href="/dashboard" class="button">Retour</a>
         <% } %>
 
         <!-- Page de la réunion -->
         <% if (page === 'meeting' && user) { %>
-          <h2>Réunion</h2>
-          <p>Bienvenue dans la réunion <strong><%= meeting.id %></strong></p>
-          <h3>Participants :</h3>
-          <ul>
-            <% participants.forEach(function(participant) { %>
-              <li><%= participant.first_name %> <%= participant.last_name %> - <%= participant.response %></li>
-            <% }); %>
-          </ul>
-          <p>Partagez ce lien pour rejoindre la réunion : <a href="/meeting/<%= meeting.id %>">Réunion <%= meeting.id %></a></p>
-        
-          <form action="/join-meeting/<%= meeting.id %>" method="POST">
-            <button type="submit" class="button">Rejoindre cette réunion</button>
-          </form>
-        
-          <a href="/dashboard" class="button">Retour</a>
-        <% } %>
-        
+        <h2>Réunion</h2>
+        <p>Bienvenue dans la réunion <strong><%= meeting.id %></strong></p>
+        <h3>Participants :</h3>
+        <ul>
+          <% participants.forEach(function(participant) { %>
+          <li>
+            <%= participant.first_name %> <%= participant.last_name %> - <%= participant.response %>
+          </li>
+          <% }); %>
+        </ul>
+        <p>
+          Partagez ce lien pour rejoindre la réunion :
+          <a href="/meeting/<%= meeting.id %>">Réunion <%= meeting.id %></a>
+        </p>
 
+        <form action="/join-meeting/<%= meeting.id %>" method="POST">
+          <button type="submit" class="button">Rejoindre cette réunion</button>
+        </form>
+
+        <a href="/dashboard" class="button">Retour</a>
+        <% } %>
       </div>
     </div>
+    <div class="modal fade" id="logoutModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Déconnexion</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">Êtes-vous sûr(e) de vouloir vous déconnecter ?</div>
+          <div class="modal-footer">
+            <a class="button" id="cancel" data-bs-dismiss="modal">Annuler</a>
+            <a href="/logout" class="button" id="logout">Déconnexion</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

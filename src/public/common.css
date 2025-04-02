@@ -1,0 +1,19 @@
+/* Style général des boutons */
+.button {
+  background: plum;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 18px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  margin: 15px;
+}
+
+.button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
