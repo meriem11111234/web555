@@ -84,40 +84,46 @@
         <% } %>
 
         <!-- Page pour créer une réunion -->
-<% if (page === 'create-meeting' && user) { %>
-  <h2>Créer une réunion</h2>
-  <p>Un lien unique sera généré pour inviter d'autres utilisateurs.</p>
-  <form action="/create-meeting" method="POST">
-    <input type="text" name="title" placeholder="Titre de la réunion" required class="input-field">
-    <textarea name="description" placeholder="Description" required class="input-field"></textarea>
-    <button type="submit" class="button">Créer la réunion</button>
-  </form>
-  <a href="/dashboard" class="button">Retour</a>
-<% } %>
+        <% if (page === 'create-meeting' && user) { %>
+          <h2>Créer une réunion</h2>
+          <p>Un lien unique sera généré pour inviter d'autres utilisateurs.</p>
+          <form action="/api/meetings" method="POST">
+            <input type="text" name="title" placeholder="Titre de la réunion" required class="input-field">
+            <textarea name="description" placeholder="Description" required class="input-field"></textarea>
+            <button type="submit" class="button">Créer la réunion</button>
+          </form>
+          <a href="/dashboard" class="button">Retour</a>
+        <% } %>
 
-<!-- Page pour rejoindre une réunion -->
-<% if (page === 'join-meeting' && user) { %>
-  <h2>Rejoindre une réunion</h2>
-  <form action="/join-meeting" method="POST">
-    <input type="text" name="meetingId" placeholder="Entrez le code de la réunion" required class="input-field">
-    <button type="submit" class="button">Rejoindre</button>
-  </form>
-  <a href="/dashboard" class="button">Retour</a>
-<% } %>
+        <!-- Page pour rejoindre une réunion -->
+        <% if (page === 'join-meeting' && user) { %>
+          <h2>Rejoindre une réunion</h2>
+          <form action="/api/join-meeting" method="POST">
+            <input type="text" name="meetingId" placeholder="Entrez le code de la réunion" required class="input-field">
+            <button type="submit" class="button">Rejoindre</button>
+          </form>
+          <a href="/dashboard" class="button">Retour</a>
+        <% } %>
 
-<!-- Page de la réunion -->
-<% if (page === 'meeting' && user) { %>
-  <h2>Réunion</h2>
-  <p>Bienvenue dans la réunion <strong><%= meeting.id %></strong></p>
-  <h3>Participants :</h3>
-  <ul>
-    <% participants.forEach(function(participant) { %>
-      <li><%= participant.first_name %> <%= participant.last_name %> - <%= participant.response %></li>
-    <% }); %>
-  </ul>
-  <p>Partagez ce lien : <a href="/meeting/<%= meeting.id %>">http://localhost:3000/meeting/<%= meeting.id %></a></p>
-  <a href="/dashboard" class="button">Retour</a>
-<% } %>
+        <!-- Page de la réunion -->
+        <% if (page === 'meeting' && user) { %>
+          <h2>Réunion</h2>
+          <p>Bienvenue dans la réunion <strong><%= meeting.id %></strong></p>
+          <h3>Participants :</h3>
+          <ul>
+            <% participants.forEach(function(participant) { %>
+              <li><%= participant.first_name %> <%= participant.last_name %> - <%= participant.response %></li>
+            <% }); %>
+          </ul>
+          <p>Partagez ce lien pour rejoindre la réunion : <a href="/meeting/<%= meeting.id %>">Réunion <%= meeting.id %></a></p>
+        
+          <form action="/join-meeting/<%= meeting.id %>" method="POST">
+            <button type="submit" class="button">Rejoindre cette réunion</button>
+          </form>
+        
+          <a href="/dashboard" class="button">Retour</a>
+        <% } %>
+        
 
       </div>
     </div>

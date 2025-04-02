@@ -5,8 +5,10 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const session = require("express-session");
 const db = require("./config/db");
+
 const userRoutes = require("./routes/userRoutes");
-const authRoutes = require("./routes/authRoutes");
+const meetingRoutes = require("./routes/meetingRoutes");
+const joinMeetingRoutes = require("./routes/joinMeetingRoutes");
 
 const app = express();
 
@@ -15,9 +17,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
-
-
-
 
 // Configuration d'EJS
 app.set("view engine", "ejs");
@@ -38,10 +37,13 @@ app.use((req, res, next) => {
 
 // Routes API
 app.use("/api/users", userRoutes);
+app.use("/api/meetings", meetingRoutes);
+app.use("/api/join-meeting", joinMeetingRoutes);
 
-// Routes EJS pour l'authentification
-app.use(authRoutes);
+// Routes EJS pour l'authentification et les utilisateurs
 app.use(userRoutes);
+app.use(meetingRoutes);
+app.use(joinMeetingRoutes);
 
 // Page d'accueil
 app.get("/", (req, res) => {
@@ -67,15 +69,13 @@ app.get("/dashboard", (req, res) => {
     }
 });
 
-
-
 // Route pour se déconnecter
 app.get("/logout", (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             return res.send("Erreur lors de la déconnexion");
         }
-        res.redirect("/"); // Rediriger à la page d'accueil après déconnexion
+        res.redirect("/");
     });
 });
 
