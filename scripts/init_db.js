@@ -11,8 +11,12 @@ const client = new Client({
 
 client.connect()
     .then(() => {
-        // Lire le fichier 
+        console.log("Connexion réussie à la base de données.");
+
+        // Lire le fichier SQL
         const sql = fs.readFileSync("./scripts/init_db.sql", "utf8");
+
+        console.log("Fichier SQL chargé.");
 
         // Exécuter le fichier SQL
         return client.query(sql);

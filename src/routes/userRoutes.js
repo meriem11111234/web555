@@ -1,100 +1,171 @@
 const express = require("express");
-const pool = require("../config/db"); // Assure-toi que la connexion à PostgreSQL fonctionne bien
+const pool = require("../config/db"); // Connexion à PostgreSQL
 const router = express.Router();
+
+// Middleware de protection des routes
+const authMiddleware = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect("/login");
+  }
+  next();
+};
 
 // Route d'inscription
 router.post("/register", async (req, res) => {
   const { last, first, email, password, role } = req.body;
 
-  console.log("Données reçues pour l'inscription :", req.body); // Log des données pour déboguer
+  console.log("Données reçues pour l'inscription :", req.body);
 
-  // Vérification des données
   if (!last || !first || !email || !password || !role) {
     return res.status(400).render("index", {
-      page: "register", // Passer la variable page avec 'register'
+      page: "register",
       error: "Tous les champs sont requis !",
     });
   }
 
   try {
-    // Vérifier si l'email est déjà utilisé
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     if (result.rows.length > 0) {
-      return res.status(400).render("index", {
-        page: "register", // Passer la variable page avec 'register'
-        error: "Cet email est déjà utilisé !",
-      });
+      return res.status(400).render("index", { page: "register", error: "Cet email est déjà utilisé !" });
     }
 
-    // ne pas Hasher le mot de passe
-    const plainPassword = password;
-
-    // Enregistrer l'utilisateur dans la base de données
     const newUser = await pool.query(
       "INSERT INTO users (last_name, first_name, email, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [last, first, email, plainPassword, role]
+      [last, first, email, password, role]
     );
 
-    console.log("Utilisateur créé avec mot de passe en clair :", newUser.rows[0]);
+    console.log("Utilisateur créé :", newUser.rows[0]);
 
-    // Envoyer la réponse
-    res.status(201).redirect("/login"); // Redirection vers la page de connexion après l'inscription
+    res.status(201).redirect("/login");
   } catch (error) {
     console.error("Erreur lors de l'inscription :", error);
-    res.status(500).render("index", {
-      page: "register", // Passer la variable page avec 'register'
-      error: "Erreur interne du serveur !",
-    });
+    res.status(500).render("index", { page: "register", error: "Erreur interne du serveur !" });
   }
 });
 
-// Route de connexion
 // Route de connexion
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log("Tentative de connexion pour l'email :", email); // Afficher l'email pour déboguer
+    console.log("Tentative de connexion pour :", email);
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    if (result.rows.length === 0) {
-      console.log("Aucun utilisateur trouvé pour cet email."); // Log si l'utilisateur n'existe pas
-      return res.status(400).render("index", {
-        page: "login",
-        error: "Utilisateur non trouvé",
-      });
+
+    if (result.rows.length === 0 || password !== result.rows[0].password) {
+      return res.status(400).render("index", { page: "login", error: "Identifiants incorrects" });
     }
 
-    const user = result.rows[0];
-
-    // Comparer directement le mot de passe en clair saisi avec le mot de passe en clair stocké
-    console.log("Mot de passe stocké en clair dans la base de données :", user.password);
-
-    if (password !== user.password) {
-      return res.status(400).render("index", {
-        page: "login",
-        error: "Mot de passe incorrect",
-      });
-    }
-
-    // Ajouter l'utilisateur à la session
-    req.session.user = user;
+    req.session.user = result.rows[0];
+    console.log("Utilisateur connecté :", req.session.user);
     res.redirect("/dashboard");
   } catch (error) {
     console.error("Erreur lors de la connexion :", error);
-    res.status(500).render("index", {
-      page: "login",
-      error: "Erreur interne du serveur",
-    });
+    res.status(500).render("index", { page: "login", error: "Erreur interne du serveur" });
   }
 });
 
-// Route pour le tableau de bord
-router.get("/dashboard", (req, res) => {
-  if (!req.session.user) return res.redirect("/login");
-  res.render("index", {
-    page: "dashboard", // Passer la variable page avec 'dashboard'
-    user: req.session.user,
-  });
+// Route du tableau de bord
+router.get("/dashboard", authMiddleware, (req, res) => {
+  res.render("index", { page: "dashboard", user: req.session.user });
+});
+
+// Route de création de réunion
+router.post("/create-meeting", authMiddleware, async (req, res) => {
+  const { title, description } = req.body;
+  const userId = req.session.user.id;
+
+  if (!title || !description) {
+    return res.status(400).render("index", { page: "create-meeting", error: "Tous les champs sont requis !" });
+  }
+
+  try {
+    const result = await pool.query(
+      "INSERT INTO meetings (title, description, creator_id) VALUES ($1, $2, $3) RETURNING id",
+      [title, description, userId]
+    );
+
+    const meetingId = result.rows[0].id;
+
+    await pool.query(
+      "INSERT INTO meeting_participants (meeting_id, user_id, response) VALUES ($1, $2, 'organisateur')",
+      [meetingId, userId]
+    );
+
+    res.redirect(`/meeting/${meetingId}`);
+  } catch (error) {
+    console.error("Erreur lors de la création de la réunion :", error);
+    res.status(500).render("index", { page: "create-meeting", error: "Erreur interne du serveur !" });
+  }
+});
+
+// Route pour rejoindre une réunion
+router.post("/join-meeting", authMiddleware, async (req, res) => {
+  const { meetingId } = req.body;
+  const userId = req.session.user.id;
+
+  if (!meetingId) {
+    return res.status(400).render("index", { page: "join-meeting", error: "L'ID de la réunion est requis !" });
+  }
+
+  try {
+    const meetingResult = await pool.query("SELECT * FROM meetings WHERE id = $1", [meetingId]);
+    if (meetingResult.rows.length === 0) {
+      return res.status(404).render("index", { page: "join-meeting", error: "Réunion non trouvée !" });
+    }
+
+    // Vérifier si l'utilisateur est déjà inscrit
+    const participantCheck = await pool.query(
+      "SELECT * FROM meeting_participants WHERE meeting_id = $1 AND user_id = $2",
+      [meetingId, userId]
+    );
+
+    if (participantCheck.rows.length === 0) {
+      await pool.query(
+        "INSERT INTO meeting_participants (meeting_id, user_id, response) VALUES ($1, $2, 'en attente')",
+        [meetingId, userId]
+      );
+    }
+
+    res.redirect(`/meeting/${meetingId}`);
+  } catch (error) {
+    console.error("Erreur lors de l'ajout à la réunion :", error);
+    res.status(500).render("index", { page: "join-meeting", error: "Erreur interne du serveur !" });
+  }
+});
+
+// Route pour afficher une réunion et ses participants
+router.get("/meeting/:id", authMiddleware, async (req, res) => {
+  const meetingId = req.params.id;
+
+  try {
+    const meetingResult = await pool.query("SELECT * FROM meetings WHERE id = $1", [meetingId]);
+
+    if (meetingResult.rows.length === 0) {
+      return res.status(404).render("index", { page: "meeting", error: "Réunion non trouvée !" });
+    }
+
+    const participantsResult = await pool.query(
+      "SELECT users.first_name, users.last_name, meeting_participants.response FROM users " +
+      "JOIN meeting_participants ON users.id = meeting_participants.user_id " +
+      "WHERE meeting_participants.meeting_id = $1",
+      [meetingId]
+    );
+
+    res.render("index", {
+      page: "meeting",
+      meeting: meetingResult.rows[0],
+      participants: participantsResult.rows,
+      user: req.session.user,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des détails de la réunion :", error);
+    res.status(500).render("index", { page: "meeting", error: "Erreur interne du serveur !" });
+  }
+});
+
+// Route pour afficher la page de création de réunion
+router.get("/create-meeting", authMiddleware, (req, res) => {
+  res.render("index", { page: "create-meeting", user: req.session.user });
 });
 
 // Route de déconnexion

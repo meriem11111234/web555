@@ -9,26 +9,26 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Créer la table des réunions
+-- Créer la table des réunions (si elle n'existe pas)
 CREATE TABLE IF NOT EXISTS meetings (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
+    creator_id INTEGER REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Créer la table des créneaux pour les réunions
-CREATE TABLE IF NOT EXISTS slots (
-    id SERIAL PRIMARY KEY,
-    meeting_id INTEGER REFERENCES meetings(id) ON DELETE CASCADE,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL
-);
+-- Vérifier si la colonne creator_id existe déjà, sinon l'ajouter
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='meetings' AND column_name='creator_id') THEN
+        ALTER TABLE meetings ADD COLUMN creator_id INTEGER REFERENCES users(id);
+    END IF;
+END $$;
 
-CREATE TABLE IF NOT EXISTS tokens (
+-- Créer la table des participants aux réunions (si elle n'existe pas)
+CREATE TABLE IF NOT EXISTS meeting_participants (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(255) NOT NULL,
-    token VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    meeting_id INTEGER REFERENCES meetings(id),
+    user_id INTEGER REFERENCES users(id),
+    response VARCHAR(50) -- Peut être "accepte", "refuse", ou "en attente"
 );
-

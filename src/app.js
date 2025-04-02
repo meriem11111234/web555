@@ -41,6 +41,7 @@ app.use("/api/users", userRoutes);
 
 // Routes EJS pour l'authentification
 app.use(authRoutes);
+app.use(userRoutes);
 
 // Page d'accueil
 app.get("/", (req, res) => {
@@ -65,6 +66,8 @@ app.get("/dashboard", (req, res) => {
         res.redirect("/login");
     }
 });
+
+
 
 // Route pour se déconnecter
 app.get("/logout", (req, res) => {
