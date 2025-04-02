@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plateforme de Planification de Réunions</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/common.css" />
+    <link rel="stylesheet" href="/style1.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
-   >
+    />
   </head>
   <body>
     <!-- Accueil -->
@@ -34,14 +35,14 @@
         <p class="error-message"><%= error %></p>
         <% } %>
         <form action="/login" method="POST" class="form-container">
-          <input type="email" name="email" placeholder="Email" required class="input-field">
+          <input type="email" name="email" placeholder="Email" required class="input-field" />
           <input
             type="password"
             name="password"
             placeholder="Mot de passe"
             required
             class="input-field"
-         >
+          />
           <button type="submit" class="button">Se connecter</button>
         </form>
         <p>Pas encore inscrit ? <a href="/register">Inscrivez-vous ici</a></p>
@@ -54,15 +55,15 @@
           <table>
             <tr>
               <td>
-                <input type="text" name="last" placeholder="Nom" required class="input-field">
+                <input type="text" name="last" placeholder="Nom" required class="input-field" />
               </td>
               <td>
-                <input type="text" name="first" placeholder="Prénom" required class="input-field">
+                <input type="text" name="first" placeholder="Prénom" required class="input-field" />
               </td>
             </tr>
             <tr>
               <td colspan="2">
-                <input type="email" name="email" placeholder="Email" required class="input-field">
+                <input type="email" name="email" placeholder="Email" required class="input-field" />
               </td>
             </tr>
             <tr>
@@ -73,7 +74,8 @@
                   placeholder="Mot de passe"
                   required
                   class="input-field"
-               >
+                  minlength="8"
+                />
               </td>
             </tr>
             <tr>
@@ -94,6 +96,7 @@
         <h1>Tableau de bord</h1>
         <p>Bienvenue, <%= user.email %> !</p>
         <p>Votre rôle : <%= user.role %></p>
+        <a href="/reception" class="button">Continuez</a>
         <a href="/logout" class="button">Déconnexion</a>
         <% } %>
       </div>

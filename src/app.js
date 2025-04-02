@@ -16,24 +16,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-
-
-
 // Configuration d'EJS
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // Configuration de la session
-app.use(session({
+app.use(
+  session({
     secret: process.env.SESSION_SECRET || "secretkey",
     resave: false,
-    saveUninitialized: true
-}));
+    saveUninitialized: true,
+  })
+);
 
 // Middleware pour rendre les variables de session accessibles dans toutes les vues
 app.use((req, res, next) => {
-    res.locals.user = req.session.user || null;
-    next();
+  res.locals.user = req.session.user || null;
+  next();
 });
 
 // Routes API
@@ -44,40 +43,44 @@ app.use(authRoutes);
 
 // Page d'accueil
 app.get("/", (req, res) => {
-    res.render("index", { title: "Accueil", page: "home", user: req.session.user });
+  res.render("index", { title: "Accueil", page: "home", user: req.session.user });
 });
 
 // Route pour afficher la page de connexion
 app.get("/login", (req, res) => {
-    res.render("index", { title: "Connexion", page: "login", error: null });
+  res.render("index", { title: "Connexion", page: "login", error: null });
 });
 
 // Route pour afficher la page d'inscription
 app.get("/register", (req, res) => {
-    res.render("index", { title: "Inscription", page: "register" });
+  res.render("index", { title: "Inscription", page: "register" });
 });
 
 // Route pour afficher le tableau de bord
 app.get("/dashboard", (req, res) => {
-    if (req.session.user) {
-        res.render("index", { title: "Tableau de bord", page: "dashboard", user: req.session.user });
-    } else {
-        res.redirect("/login");
-    }
+  if (req.session.user) {
+    res.render("index", { title: "Tableau de bord", page: "dashboard", user: req.session.user });
+  } else {
+    res.redirect("/login");
+  }
+});
+
+app.get("/reception", (req, res) => {
+  if (req.session.user) res.render("reception");
 });
 
 // Route pour se déconnecter
 app.get("/logout", (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.send("Erreur lors de la déconnexion");
-        }
-        res.redirect("/"); // Rediriger à la page d'accueil après déconnexion
-    });
+  req.session.destroy((err) => {
+    if (err) {
+      return res.send("Erreur lors de la déconnexion");
+    }
+    res.redirect("/"); // Rediriger à la page d'accueil après déconnexion
+  });
 });
 
 // Lancer le serveur sur un port aléatoire
-const server = app.listen(0, () => { 
-    const port = server.address().port;
-    console.log(`✅ Serveur démarré sur http://localhost:${port}`);
+const server = app.listen(0, () => {
+  const port = server.address().port;
+  console.log(`✅ Serveur démarré sur http://localhost:${port}`);
 });
