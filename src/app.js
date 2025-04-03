@@ -85,6 +85,22 @@ app.get("/logout", (req, res) => {
   });
 });
 
+app.get("/join-meeting", (req, res) => {
+  console.log("Tentative de rejoindre une réunion...");
+
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Erreur lors de la suppression de la session :", err);
+      return res.send("Erreur rejoindre");
+    }
+
+    console.log("Session détruite avec succès. Redirection en cours...");
+    res.redirect("/"); // Rediriger à la page d'accueil après déconnexion
+  });
+});
+
+
+
 // Lancer le serveur sur un port aléatoire
 const server = app.listen(0, () => {
   const port = server.address().port;
