@@ -1,0 +1,42 @@
+<!-- Page d'inscription -->
+<% if (page === 'register') { %>
+<h2>Inscription</h2>
+<form action="/api/users/register" method="POST" class="form-container">
+  <table>
+    <tr>
+      <td>
+        <input type="text" name="last" placeholder="Nom" required class="input-field" />
+      </td>
+      <td>
+        <input type="text" name="first" placeholder="Prénom" required class="input-field" />
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <input type="email" name="email" placeholder="Email" required class="input-field" />
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <input
+          type="password"
+          name="password"
+          placeholder="Mot de passe"
+          required
+          class="input-field"
+          minlength="8"
+        />
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <select name="role" class="input-field">
+          <option value="organisateur">Organisateur</option>
+          <option value="participant">Participant</option>
+        </select>
+      </td>
+    </tr>
+  </table>
+  <button type="submit" class="button">S'inscrire</button>
+</form>
+<% } %>

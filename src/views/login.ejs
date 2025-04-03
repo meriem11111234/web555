@@ -1,0 +1,13 @@
+<!-- Page de connexion -->
+<% if (page === 'login') { %>
+<h2>Connexion</h2>
+<% if (error) { %>
+<p class="error-message"><%= error %></p>
+<% } %>
+<form action="/login" method="POST" class="form-container">
+  <input type="email" name="email" placeholder="Email" required class="input-field" />
+  <input type="password" name="password" placeholder="Mot de passe" required class="input-field" />
+  <button type="submit" class="button">Se connecter</button>
+</form>
+<p>Pas encore inscrit ? <a href="/register">Inscrivez-vous ici</a></p>
+<% } %>

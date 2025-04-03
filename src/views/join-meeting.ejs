@@ -1,0 +1,15 @@
+<!-- Page pour rejoindre une réunion -->
+<% if (page === 'join-meeting' && user) { %>
+<h2>Rejoindre une réunion</h2>
+<form action="/api/join-meeting" method="POST">
+  <input
+    type="text"
+    name="meetingId"
+    placeholder="Entrez le code de la réunion"
+    required
+    class="input-field"
+  />
+  <button type="submit" class="button">Rejoindre</button>
+</form>
+<a href="/dashboard" class="button">Retour</a>
+<% } %>

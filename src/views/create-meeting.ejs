@@ -1,0 +1,11 @@
+<!-- Page pour créer une réunion -->
+<% if (page === 'create-meeting' && user) { %>
+<h2>Créer une réunion</h2>
+<p>Un lien unique sera généré pour inviter d'autres utilisateurs.</p>
+<form action="/api/meetings" method="POST">
+  <input type="text" name="title" placeholder="Titre de la réunion" required class="input-field" />
+  <textarea name="description" placeholder="Description" required class="input-field"></textarea>
+  <button type="submit" class="button">Créer la réunion</button>
+</form>
+<a href="/dashboard" class="button">Retour</a>
+<% } %>

@@ -1,0 +1,13 @@
+<!-- Page d'accueil -->
+<% if (page === 'home') { %>
+<h1>Bienvenue sur la plateforme de planification de réunions</h1>
+<% if (user) { %>
+<p>Connecté en tant que <%= user.email %> (<%= user.role %>)</p>
+<a href="/dashboard" class="button">Aller au tableau de bord</a>
+<a href="/logout" class="button">Déconnexion</a>
+<% } else { %>
+<div class="button-container">
+  <a href="/login" class="button">Se connecter</a>
+  <a href="/register" class="button">S'inscrire</a>
+</div>
+<% } %> <% } %>
