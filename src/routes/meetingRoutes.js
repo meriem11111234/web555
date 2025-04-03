@@ -2,7 +2,6 @@ const express = require("express");
 const pool = require("../config/db");
 const router = express.Router();
 
-// Supposons que tu aies une fonction pour gérer la création de réunion
 const { createMeeting } = require('../controllers/meetingController');
 
 // Route pour créer une réunion
