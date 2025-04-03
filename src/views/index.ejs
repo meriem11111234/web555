@@ -130,7 +130,9 @@
 
         <!-- Page pour rejoindre une réunion -->
        
-        <h2>Valide</h2>
+       
+        <% if (page === 'join-meeting' && user) { %>
+          <h2>Valide</h2>
         <form action="/api/join-meeting" method="POST">
           <input
             type="text"
@@ -142,6 +144,7 @@
           <button type="submit" class="button">Rejoindre</button>
         </form>
         <a href="/dashboard" class="button">Retour</a>
+        <% } %>
       
 
         <!-- Page de la réunion -->
