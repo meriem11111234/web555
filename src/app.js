@@ -64,15 +64,19 @@ app.get("/register", (req, res) => {
 
 // Route pour afficher le tableau de bord
 app.get("/dashboard", (req, res) => {
-  if (req.session.user) {
+  if (req.session.user)
     res.render("index", { title: "Tableau de bord", page: "dashboard", user: req.session.user });
-  } else {
-    res.redirect("/login");
-  }
+  else res.redirect("/login");
 });
 
 app.get("/reception", (req, res) => {
   if (req.session.user) res.render("reception");
+});
+
+app.get("/join-meeting", (req, res) => {
+  if (req.session.user)
+    res.render("index", { title: "Réunions", page: "join-meeting", user: req.session.user });
+  else res.redirect("/login");
 });
 
 // Route pour se déconnecter
