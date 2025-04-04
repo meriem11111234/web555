@@ -42,6 +42,24 @@ app.use("/api/users", userRoutes);
 app.use("/api/meetings", meetingRoutes);
 app.use("/api/join-meeting", joinMeetingRoutes);
 
+// Route POST pour rejoindre une réunion avec le code
+app.post("/api/join-meeting", (req, res) => {
+  const meetingId = req.body.meetingId;
+  // Cherche la réunion dans la base de données
+  db.query("SELECT * FROM meetings WHERE id = $1", [meetingId], (err, result) => {
+    if (err) {
+      return res.send("Erreur lors de la recherche de la réunion.");
+    }
+
+    if (result.rows.length === 0) {
+      return res.send("Réunion non trouvée.");
+    }
+
+    // Si la réunion existe, redirige vers la page de la réunion
+    res.redirect(`/meeting/${meetingId}`);
+  });
+});
+
 // Routes EJS pour l'authentification et les utilisateurs
 app.use(userRoutes);
 app.use(meetingRoutes);
@@ -88,6 +106,19 @@ app.get("/logout", (req, res) => {
     res.redirect("/"); // Rediriger à la page d'accueil après déconnexion
   });
 });
+
+// Route pour afficher la page "Rejoindre une réunion"
+app.get("/join-meeting", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/login"); // Redirige vers la page de connexion si l'utilisateur n'est pas connecté
+  }
+
+  // Rendre la page "join-meeting" avec les informations de l'utilisateur
+  res.render("index", { title: "Rejoindre une réunion", page: "join-meeting", user: req.session.user });
+});
+
+
+
 
 // Lancer le serveur sur un port aléatoire
 const server = app.listen(0, () => {
