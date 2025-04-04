@@ -18,7 +18,7 @@ client.connect()
 
         console.log("Fichier SQL chargé.");
 
-        // Exécuter le fichier SQL
+        // exécuter le fichier SQL
         return client.query(sql);
     })
     .then(() => {
