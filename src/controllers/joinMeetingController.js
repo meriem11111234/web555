@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 
+// Fonction pour rejoindre une réunion
 const joinMeeting = async (req, res) => {
   const { meetingCode } = req.body;
   const userId = req.session.user.id;
@@ -37,4 +38,13 @@ const joinMeeting = async (req, res) => {
   }
 };
 
-module.exports = { joinMeeting };
+// Afficher la page "rejoindre une réunion"
+const renderJoinMeetingPage = (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  res.render("index", { page: "join-meeting", user: req.session.user });
+};
+
+module.exports = {
+  joinMeeting,
+  renderJoinMeetingPage,
+};

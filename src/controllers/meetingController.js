@@ -1,6 +1,6 @@
 const pool = require('../config/db');
 
-// Fonction pour générer un code aléatoire
+// Génère un code de réunion aléatoire
 function generateMeetingCode(length = 8) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let code = '';
@@ -10,7 +10,7 @@ function generateMeetingCode(length = 8) {
   return code;
 }
 
-// Fonction pour créer la réunion
+// Créer une réunion (POST /api/meetings)
 const createMeeting = async (req, res) => {
   const { title, description } = req.body;
   const userId = req.session.user.id;
@@ -40,4 +40,45 @@ const createMeeting = async (req, res) => {
   }
 };
 
-module.exports = { createMeeting };
+// Afficher la page de création de réunion (GET /api/meetings/create-meeting)
+const renderCreateMeetingPage = (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  res.render("index", { page: "create-meeting", user: req.session.user });
+};
+
+// Afficher les détails d’une réunion (GET /api/meetings/meeting/code/:code)
+const getMeetingDetails = async (req, res) => {
+  const meetingCode = req.params.code;
+
+  if (!req.session.user) return res.redirect("/login");
+
+  try {
+    const meetingResult = await pool.query("SELECT * FROM meetings WHERE code = $1", [meetingCode]);
+    const meeting = meetingResult.rows[0];
+
+    if (!meeting) {
+      return res.status(404).render("index", { page: "meeting", error: "Réunion non trouvée !" });
+    }
+
+    const participantsResult = await pool.query(
+      "SELECT users.first_name, users.last_name, meeting_participants.response FROM users JOIN meeting_participants ON users.id = meeting_participants.user_id WHERE meeting_participants.meeting_id = $1",
+      [meeting.id]
+    );
+
+    res.render("index", {
+      page: "meeting",
+      meeting,
+      participants: participantsResult.rows,
+      user: req.session.user,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des détails de la réunion :", error);
+    res.status(500).render("index", { page: "meeting", error: "Erreur interne du serveur !" });
+  }
+};
+
+module.exports = {
+  createMeeting,
+  renderCreateMeetingPage,
+  getMeetingDetails,
+};
