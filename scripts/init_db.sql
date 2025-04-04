@@ -1,3 +1,7 @@
+DROP IF EXISTS users;
+DROP IF EXISTS meetings;
+DROP IF EXISTS meeting_participants;
+
 -- Créer la table des utilisateurs
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
