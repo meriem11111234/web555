@@ -13,21 +13,19 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Créer la table des réunions (si elle n'existe pas)
+-- Créer la table des réunions
 CREATE TABLE IF NOT EXISTS meetings (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     creator_id INTEGER REFERENCES users(id),
+    code VARCHAR(10) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Vérifier si la colonne creator_id existe déjà, sinon l'ajouter
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='meetings' AND column_name='creator_id') THEN
-        ALTER TABLE meetings ADD COLUMN creator_id INTEGER REFERENCES users(id);
-    END IF;
-END $$;
+-- Ajouter la colonne code uniquement si elle n'existe pas déjà
+ALTER TABLE meetings
+ADD COLUMN IF NOT EXISTS code VARCHAR(10) UNIQUE;
 
 -- Créer la table des participants aux réunions (si elle n'existe pas)
 CREATE TABLE IF NOT EXISTS meeting_participants (

@@ -1,7 +1,8 @@
 <!-- Page de la réunion -->
 <% if (page === 'meeting' && user) { %>
 <h2>Réunion</h2>
-<p>Bienvenue dans la réunion <strong><%= meeting.id %></strong></p>
+<p>Bienvenue dans la réunion <strong><%= meeting.title %></strong> (code : <%= meeting.code %>)</p>
+
 <h3>Participants :</h3>
 <ul>
   <% participants.forEach(function(participant) { %>
@@ -10,10 +11,11 @@
 </ul>
 <p>
   Partagez ce lien pour rejoindre la réunion :
-  <a href="/meeting/<%= meeting.id %>">Réunion <%= meeting.id %></a>
+  <a href="/meeting/code/<%= meeting.code %>">Lien de la réunion</a>
+
 </p>
 
-<form action="/join-meeting/<%= meeting.id %>" method="POST"></form>
+<!--<form action="/join-meeting/<%= meeting.id %>" method="POST"></form> -->
 
 <a href="/dashboard" class="button">Quitter cette réunion</a>
 <% } %>

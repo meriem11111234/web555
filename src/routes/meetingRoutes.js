@@ -47,12 +47,12 @@ router.post("/create-meeting", async (req, res) => {
 });
 
 // Route pour afficher les détails d'une réunion
-router.get("/meeting/:id", async (req, res) => {
+router.get("/meeting/code/:code", async (req, res) => {
   if (req.session.user) {
-    const meetingId = req.params.id;
+    const meetingCode = req.params.code;
 
     try {
-      const meetingResult = await pool.query("SELECT * FROM meetings WHERE id = $1", [meetingId]);
+      const meetingResult = await pool.query("SELECT * FROM meetings WHERE code = $1", [meetingCode]);
       const meeting = meetingResult.rows[0];
 
       if (!meeting) {
@@ -61,7 +61,7 @@ router.get("/meeting/:id", async (req, res) => {
 
       const participantsResult = await pool.query(
         "SELECT users.first_name, users.last_name, meeting_participants.response FROM users JOIN meeting_participants ON users.id = meeting_participants.user_id WHERE meeting_participants.meeting_id = $1",
-        [meetingId]
+        [meeting.id]
       );
 
       res.render("index", {
@@ -76,5 +76,6 @@ router.get("/meeting/:id", async (req, res) => {
     }
   } else res.redirect("/login");
 });
+
 
 module.exports = router;

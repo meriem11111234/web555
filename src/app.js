@@ -43,22 +43,7 @@ app.use("/api/meetings", meetingRoutes);
 app.use("/api/join-meeting", joinMeetingRoutes);
 
 // Route POST pour rejoindre une réunion avec le code
-app.post("/api/join-meeting", (req, res) => {
-  const meetingId = req.body.meetingId;
-  // Cherche la réunion dans la base de données
-  db.query("SELECT * FROM meetings WHERE id = $1", [meetingId], (err, result) => {
-    if (err) {
-      return res.send("Erreur lors de la recherche de la réunion.");
-    }
 
-    if (result.rows.length === 0) {
-      return res.send("Réunion non trouvée.");
-    }
-
-    // Si la réunion existe, redirige vers la page de la réunion
-    res.redirect(`/meeting/${meetingId}`);
-  });
-});
 
 // Routes EJS pour l'authentification et les utilisateurs
 app.use(userRoutes);
