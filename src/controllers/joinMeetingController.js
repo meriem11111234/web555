@@ -9,7 +9,7 @@ const joinMeeting = async (req, res) => {
     const meetingCheck = await pool.query("SELECT * FROM meetings WHERE code = $1", [meetingCode]);
 
     if (meetingCheck.rows.length === 0) {
-      return res.status(404).render("index", { page: "join-meeting", error: "Réunion introuvable" });
+      return res.status(404).render("index", { page: "join-meeting", error: " La réunion introuvable" });
     }
 
     const meetingId = meetingCheck.rows[0].id;
