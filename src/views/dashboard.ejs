@@ -1,11 +1,12 @@
 <!-- Tableau de bord -->
 <% if (page === 'dashboard' && user) { %>
-<h1>Tableau de bord</h1>
-<p>Bienvenue, <%= user.email %> !</p>
-<p>Votre rôle : <%= user.role %></p>
-
-<!-- Boutons de gestion des réunions -->
-<a href="/create-meeting" class="button">Créer une réunion</a>
-<a href="/join-meeting" class="button">Rejoindre une réunion</a>
-<a href="" class="button" data-bs-toggle="modal" data-bs-target="#logoutModal">Déconnexion</a>
-<% } %>
+    <h1>Tableau de bord</h1>
+    <p>Bienvenue, <%= user.email %> !</p>
+    <p>Votre rôle : <%= user.role %></p>
+  
+    <!-- Boutons de gestion des réunions -->
+    <a href="/create-meeting" class="button">Créer une réunion</a>
+    <a href="/join-meeting" class="button">Rejoindre une réunion</a>
+    <a href="/ajouter-disponibilite" class="button">Ajouter mes disponibilités</a> <!-- ✅ ICI -->
+    <a href="" class="button" data-bs-toggle="modal" data-bs-target="#logoutModal">Déconnexion</a>
+  <% } %>

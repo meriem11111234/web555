@@ -5,7 +5,7 @@ const User = require("../models/User");
 // Route pour afficher la page de connexion
 router.get("/login", (req, res) => {
   res.render("index", {
-    page: "login", // Cette variable permet de rendre la section de connexion
+    page: "login", //  permet de rendre la section de connexion
     error: null,
     title: "Connexion",
     user: req.session.user, // Pour récupérer l'utilisateur connecté
@@ -15,7 +15,7 @@ router.get("/login", (req, res) => {
 // Route pour afficher la page d'inscription
 router.get("/register", (req, res) => {
   res.render("index", {
-    page: "register", // Cette variable permet de rendre la section d'inscription
+    page: "register", //  permet de rendre la section d'inscription
     error: null,
     title: "Inscription",
     user: req.session.user, // Pour récupérer l'utilisateur connecté
@@ -56,16 +56,16 @@ router.post("/login", async (req, res) => {
       return res.render("index", { page: "login", error: "Utilisateur non trouvé" });
     }
 
-    // Affichage du mot de passe stocké (en clair) dans la base de données
-    console.log("Mot de passe stocké en clair dans la base de données :", user.password);
+    // Affichage du mot de passe stocké (en clair) dans la base de données  ... A AMELIORER 
+    console.log("Mot de passe stocké  dans la base de données :", user.password);
 
-    // Comparaison du mot de passe fourni avec celui stocké en clair dans la base de données
+    // Comparaison du mot de passe fourni avec celui stocké  dans la base de données
     if (password !== user.password) {
       console.log("Le mot de passe saisi ne correspond pas au mot de passe stocké.");
       return res.render("index", { page: "login", error: "Mot de passe incorrect" });
     }
 
-    // Si tout est correct, on crée une session pour l'utilisateur
+    // Si tout est ok , on crée une session pour l'utilisateur
     console.log("Connexion réussie pour l'utilisateur :", email);
     req.session.user = user;
 
@@ -79,9 +79,9 @@ router.post("/login", async (req, res) => {
 
 // Route pour afficher le tableau de bord
 router.get("/dashboard", (req, res) => {
-  if (!req.session.user) return res.redirect("/login"); // Rediriger si l'utilisateur n'est pas connecté
+  if (!req.session.user) return res.redirect("/login"); // Rediriger vers login si l'utilisateur n'est pas connecté
   res.render("index", {
-    page: "dashboard", // Cette variable permet de rendre la section du tableau de bord
+    page: "dashboard", 
     user: req.session.user,
     title: "Tableau de bord",
   });

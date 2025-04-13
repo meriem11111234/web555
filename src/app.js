@@ -41,8 +41,41 @@ app.use((req, res, next) => {
 app.use("/api/users", userRoutes);
 app.use("/api/meetings", meetingRoutes);
 app.use("/api/join-meeting", joinMeetingRoutes);
+const availabilityRoutes = require("./routes/availabilityRoutes");
+app.use("/availabilities", availabilityRoutes);
+const slotResponseRoutes = require("./routes/slotResponseRoutes");
+app.use("/api/slot-response", slotResponseRoutes);
+app.get("/ajouter-disponibilite", async (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
 
-// Route POST pour rejoindre une réunion avec le code
+  try {
+    const user_id = req.session.user.id;
+
+    const meetingsResult = await db.query(`
+      SELECT meetings.id, meetings.title 
+      FROM meetings 
+      JOIN meeting_participants ON meetings.id = meeting_participants.meeting_id 
+      WHERE meeting_participants.user_id = $1
+    `, [user_id]);
+
+    const availabilitiesResult = await db.query(`
+      SELECT * FROM availabilities WHERE user_id = $1
+    `, [user_id]);
+
+    res.render("index", {
+      page: "ajouter-disponibilite",
+      user: req.session.user,
+      meetings: meetingsResult.rows,
+      availabilities: availabilitiesResult.rows 
+    });
+
+  } catch (error) {
+    console.error("Erreur :", error);
+    res.status(500).send("Erreur serveur");
+  }
+});
+
+
 
 
 // Routes EJS pour l'authentification et les utilisateurs
@@ -59,6 +92,11 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   res.render("index", { title: "Connexion", page: "login", error: null });
 });
+
+const { getMeetingDetails } = require("./controllers/meetingController");
+
+app.get("/meeting/code/:code", getMeetingDetails);
+
 
 // Route pour afficher la page d'inscription
 app.get("/register", (req, res) => {
@@ -105,8 +143,11 @@ app.get("/join-meeting", (req, res) => {
 
 
 
-// Lancer le serveur sur un port aléatoire
-const server = app.listen(0, () => {
-  const port = server.address().port;
-  console.log(`✅ Serveur démarré sur http://localhost:${port}`);
+const PORT = process.env.PORT || 3000;
+
+const server = app.listen(PORT, () => {
+  const baseUrl = `http://localhost:${PORT}`;
+  app.locals.baseUrl = baseUrl; 
+  console.log(`✅ Serveur démarré sur ${baseUrl}`);
 });
+

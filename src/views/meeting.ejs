@@ -1,21 +1,107 @@
-<!-- Page de la réunion -->
 <% if (page === 'meeting' && user) { %>
-<h2>Réunion</h2>
-<p>Bienvenue dans la réunion <strong><%= meeting.title %></strong> (code : <%= meeting.code %>)</p>
+  <h2>Réunion</h2>
+  <p>Bienvenue dans la réunion <strong><%= meeting.title %></strong> (code : <%= meeting.code %>)</p>
 
-<h3>Participants :</h3>
-<ul>
-  <% participants.forEach(function(participant) { %>
-  <li><%= participant.first_name %> <%= participant.last_name %> - <%= participant.response %></li>
-  <% }); %>
-</ul>
-<p>
-  Partagez ce lien pour rejoindre la réunion :
-  <a href="/meeting/code/<%= meeting.code %>">Lien de la réunion</a>
+  <h3>Participants :</h3>
+  <ul>
+    <% participants.forEach(function(participant) { %>
+      <% if (participant.response !== 'organisateur') { %>
+        <li><%= participant.first_name %> <%= participant.last_name %> - <%= participant.response %></li>
+      <% } %>
+    <% }); %>
+  </ul>
 
-</p>
+  <p>
+    Partagez ce lien pour rejoindre la réunion :
+    <a href="/meeting/code/<%= meeting.code %>">Lien de la réunion</a>
+  </p>
 
-<!--<form action="/join-meeting/<%= meeting.id %>" method="POST"></form> -->
+  <h3>Disponibilités des participants :</h3>
+  <ul>
+    <% meetingAvailabilities.forEach(function(a) { %>
+      <li><%= a.first_name %> <%= a.last_name %> : de <%= new Date(a.start_time).toLocaleString() %> à <%= new Date(a.end_time).toLocaleString() %></li>
+    <% }); %>
+  </ul>
 
-<a href="/dashboard" class="button">Quitter cette réunion</a>
+  <h3>Créneaux proposés :</h3>
+
+  <% if (meeting.creator_id === user.id) { %>
+    <!-- ORGANISATEUR : VOIT LES RÉPONSES SAUF LA SIENNE -->
+    <% slots.forEach(function(slot) { %>
+      <div style="margin-bottom: 1em;">
+        <strong><%= new Date(slot.start_time).toLocaleString() %> - <%= new Date(slot.end_time).toLocaleString() %></strong>
+        <ul>
+          <% participants.forEach(function(p) {
+            if (p.response !== 'organisateur') {
+              const response = allSlotResponses?.find(r => r.slot_id === slot.id && r.user_id === p.id);
+          %>
+            <li>
+              <%= p.first_name %> <%= p.last_name %> :
+              <% if (response && response.response === 'accepté') { %>
+                accepté (<%= new Date(slot.start_time).toLocaleTimeString() %> - <%= new Date(slot.end_time).toLocaleTimeString() %>)
+              <% } else { %>
+                en attente
+              <% } %>
+            </li>
+          <% } }); %>
+        </ul>
+      </div>
+    <% }); %>
+  <% } else { %>
+    <!-- PARTICIPANT -->
+    <form id="slot-response-form">
+      <% slots.forEach(function(slot) { %>
+        <div style="margin-bottom: 1em;" data-slot-id="<%= slot.id %>">
+          <label>
+            <input type="radio" name="accepted_slot_id" value="<%= slot.id %>"
+              <% if (userResponses && userResponses[slot.id] === 'accepté') { %> checked <% } %> 
+            >
+            <strong><%= new Date(slot.start_time).toLocaleString() %> - <%= new Date(slot.end_time).toLocaleString() %></strong>
+            <span class="response-status">
+              <% if (userResponses && userResponses[slot.id] === 'accepté') { %> — accepté <% } %>
+            </span>
+          </label>
+        </div>
+      <% }); %>
+      <input type="hidden" name="meeting_id" value="<%= meeting.id %>">
+      <button type="submit">Envoyer ma réponse</button>
+    </form>
+
+    <script>
+      document.getElementById("slot-response-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const acceptedSlotId = form.querySelector('input[name="accepted_slot_id"]:checked')?.value;
+        const meetingId = form.querySelector('input[name="meeting_id"]').value;
+
+        if (!acceptedSlotId) return alert("Veuillez choisir un créneau.");
+
+        try {
+          const response = await fetch("/api/slot-response", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              meeting_id: meetingId,
+              accepted_slot_id: acceptedSlotId,
+            }),
+          });
+
+          if (response.ok) {
+            // Réinitialise tous les statuts
+            document.querySelectorAll(".response-status").forEach(el => el.textContent = "");
+            document.querySelector(`div[data-slot-id="${acceptedSlotId}"] .response-status`).textContent = " — accepté";
+          } else {
+            alert("Erreur lors de l'enregistrement.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Erreur réseau");
+        }
+      });
+    </script>
+  <% } %>
+
+  <a href="/dashboard" class="button">Quitter cette réunion</a>
 <% } %>
+

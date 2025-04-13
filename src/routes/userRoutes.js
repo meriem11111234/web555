@@ -15,7 +15,7 @@ router.post("/register", async (req, res) => {
 
   try {
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    console.log("✅ Résultat de la recherche utilisateur par email : ", result.rows);  // Affichage des utilisateurs avec cet email dans le terminal
+    console.log(" Résultat de la recherche utilisateur par email : ", result.rows);  
     if (result.rows.length > 0) {
       return res.status(400).render("index", {
         page: "register",
@@ -23,12 +23,12 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Stockage du mot de passe en clair (⚠️ à améliorer avec bcrypt)
+    // Stockage du mot de passe en clair ( à améliorer avec bcrypt)
     const newUser = await pool.query(
       "INSERT INTO users (last_name, first_name, email, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [last, first, email, password, role]
     );
-    console.log("✅ Nouveau utilisateur créé : ", newUser.rows[0]);  // Affichage des informations du nouvel utilisateur
+    console.log(" Nouveau utilisateur créé : ", newUser.rows[0]);  // Affichage  du nouvel utilisateur
 
     res.status(201).redirect("/login");
   } catch (error) {
@@ -43,7 +43,7 @@ router.post("/login", async (req, res) => {
 
   try {
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    console.log("✅ Résultat de la recherche utilisateur par email : ", result.rows);  // Affichage de l'utilisateur trouvé dans le terminal
+    console.log(" Résultat de la recherche utilisateur par email : ", result.rows);  
     if (result.rows.length === 0) {
       return res.status(400).render("index", { page: "login", error: "Utilisateur non trouvé" });
     }
@@ -65,13 +65,13 @@ router.post("/login", async (req, res) => {
 // Route pour le tableau de bord
 router.get("/dashboard", (req, res) => {
   if (!req.session.user) return res.redirect("/login");
-  console.log("✅ Données de l'utilisateur connecté : ", req.session.user);  // Affichage des données de l'utilisateur connecté dans le terminal
+  console.log(" Données de l'utilisateur connecté : ", req.session.user);  
   res.render("index", { page: "dashboard", user: req.session.user });
 });
 
 // Route de déconnexion
 router.get("/logout", (req, res) => {
-  console.log("✅ Utilisateur déconnecté : ", req.session.user);  // Affichage de l'utilisateur déconnecté dans le terminal
+  console.log(" Utilisateur déconnecté : ", req.session.user);  
   req.session.destroy(() => {
     res.redirect("/");
   });

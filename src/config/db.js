@@ -1,10 +1,11 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
-// Configuration de la connexion PostgreSQL
+// Configuration de la connexion PostgreSQL : pour une connexion sécurisée et chiffrée entre App.js et la base de donnée
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
+    ssl: process.env.NODE_ENV === "production" ?  //Si je suis en ligne , sur internet 
+    { rejectUnauthorized: false } : false
 });
 
 // Vérifier la connexion

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 
+ /*Une route qui gere la création de compte  */
 exports.register = async (req, res) => {
   try {
     const { last, first, email, password, role } = req.body;
@@ -17,6 +18,7 @@ exports.register = async (req, res) => {
   }
 };
 
+/*Une route qui gère la connexion  */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;

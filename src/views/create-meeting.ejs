@@ -1,11 +1,41 @@
-<!-- Page pour créer une réunion -->
 <% if (page === 'create-meeting' && user) { %>
-<h2>Créer une réunion</h2>
-<p>Un lien unique sera généré pour inviter d'autres utilisateurs.</p>
-<form action="/api/meetings" method="POST">
-  <input type="text" name="title" placeholder="Titre de la réunion" required class="input-field" />
-  <textarea name="description" placeholder="Description" required class="input-field"></textarea>
-  <button type="submit" class="button">Créer la réunion</button>
-</form>
-<a href="/dashboard" class="button">Retour</a>
+  <h2>Créer une réunion</h2>
+  <p>Un lien unique sera généré pour inviter d'autres utilisateurs.</p>
+
+  <form action="/create-meeting" method="POST" class="form-container">
+    <input type="text" name="title" placeholder="Titre de la réunion" required class="input-field" />
+    <textarea name="description" placeholder="Description" required class="input-field" rows="4"></textarea>
+
+    <!-- Sélecteur de participants -->
+    <select name="invitedUsers[]" class="input-field" multiple>
+      <% allUsers.forEach(function(u) { if (u.id !== user.id) { %>
+        <option value="<%= u.id %>"><%= u.first_name %> <%= u.last_name %> (<%= u.email %>)</option>
+      <% }}); %>
+    </select>
+    <h3>Créneaux proposés</h3>
+    <div id="slots-container">
+      <div class="slot-row">
+        <input type="datetime-local" name="slots[start_time][]" required>
+        <input type="datetime-local" name="slots[end_time][]" required>
+      </div>
+    </div>
+    <button type="button" onclick="addSlot()">+ Ajouter un créneau</button>
+    <div class="button-container">
+      <button type="submit" class="button">Créer la réunion</button>
+      <a href="/dashboard" class="button">Retour</a>
+    </div>
+  </form>
 <% } %>
+
+<script>
+  function addSlot() {
+    const container = document.getElementById('slots-container');
+    const slot = document.createElement('div');
+    slot.classList.add('slot-row');
+    slot.innerHTML = `
+      <input type="datetime-local" name="slots[start_time][]" required>
+      <input type="datetime-local" name="slots[end_time][]" required>
+    `;
+    container.appendChild(slot);
+  }
+</script>

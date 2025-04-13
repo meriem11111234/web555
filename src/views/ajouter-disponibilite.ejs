@@ -1,0 +1,17 @@
+<% if (page === 'ajouter-disponibilite' && user) { %>
+    <h2>Mes disponibilités générales</h2>
+  
+    <!-- Formulaire upload .ics -->
+    <form method="POST" action="/availabilities/import-ics" enctype="multipart/form-data">
+      <label>Importer un fichier .ics :</label>
+      <input type="file" name="icsFile" accept=".ics" required>
+      <button type="submit">Importer</button>
+    </form>
+  
+    <h3>Disponibilités enregistrées :</h3>
+    <ul>
+      <% availabilities.forEach(function(a) { %>
+        <li>🗓️ Du <%= a.start_time %> au <%= a.end_time %></li>
+      <% }) %>
+    </ul>
+  <% } %>

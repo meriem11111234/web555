@@ -1,67 +1,125 @@
-/* Applique un fond d'écran */
+/* Fond violet foncé */
 .background {
-  background: url("/img/img1.jpg") no-repeat center center fixed;
-  background-size: cover;
+  background: linear-gradient(135deg,#fff5f9,  #fff5f9);
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 20px;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-/* Conteneur centralisé pour tous les éléments */
+/* Carte blanche plus étroite */
 .container {
-  background: rgba(255, 255, 255, 0.9); /* Fond légèrement opaque */
+  background: white;
+  color: #1c003b;
   padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   text-align: center;
   width: 100%;
-  max-width: 600px;
+  max-width: 500px; /* Moins large */
+  transition: all 0.3s ease-in-out;
 }
 
-/* Conteneur des boutons (centrer les boutons de connexion et inscription) */
+/* Titres */
+h1, h2, h3 {
+  color: #1c003b;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+/* Conteneur de boutons */
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 20px;
 }
 
-/* Formulaire de connexion/inscription */
+/* Boutons modernes violet */
+.button {
+  background: linear-gradient(135deg, #a259ff, #6d28d9);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px #a259ff;
+}
+
+/* Formulaires */
 .form-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 15px;
+  margin-top: 10px;
 }
 
-/* Champ de saisie */
+/* Champs de saisie */
 .input-field {
   width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  border-radius: 5px;
+  max-width: 400px;
+  padding: 12px;
+  border-radius: 10px;
   border: 1px solid #ccc;
+  font-size: 15px;
+  background: #f4f4f4;
+  color: #333;
+}
+
+.input-field::placeholder {
+  color: #888;
 }
 
 select.input-field {
-  max-width: 300px;
+  background-color: #f4f4f4;
 }
 
 /* Message d'erreur */
 .error-message {
-  color: red;
+  color: #e63946;
   font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
 }
 
+/* Boutons spécifiques */
 #cancel {
   padding: 10px;
 }
 
 #logout {
-  background-color: red;
+  background-color: #d62828;
   color: white;
-  padding: 10px;
+  padding: 12px 20px;
   border-radius: 10px;
-  text-decoration: none;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+#logout:hover {
+  background-color: #b71c1c;
+}
+
+/* Animation douce à l'affichage */
+body {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

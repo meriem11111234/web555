@@ -12,7 +12,7 @@ router.get("/create-meeting", renderCreateMeetingPage);
 // Route pour créer une réunion (appelée depuis un formulaire)
 router.post("/create-meeting", createMeeting);
 
-// Route API directe (utilisée si tu appelles avec fetch/ajax)
+// Route API directe 
 router.post("/", createMeeting);
 
 // Route pour afficher une réunion par code
