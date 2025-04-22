@@ -1,8 +1,12 @@
 -- Supprimer les tables si elles existent (dans le bon ordre à cause des clés étrangères)
-DROP TABLE IF EXISTS availabilities;
-DROP TABLE IF EXISTS meeting_participants;
-DROP TABLE IF EXISTS meetings;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS pending_invitations CASCADE;
+DROP TABLE IF EXISTS slot_responses CASCADE;
+DROP TABLE IF EXISTS availabilities CASCADE;
+DROP TABLE IF EXISTS meeting_slots CASCADE;
+DROP TABLE IF EXISTS meeting_participants CASCADE;
+DROP TABLE IF EXISTS meetings CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
 
 -- Créer la table des utilisateurs
 CREATE TABLE IF NOT EXISTS users (
@@ -63,5 +67,14 @@ CREATE TABLE slot_responses (
   id SERIAL PRIMARY KEY,
   slot_id INTEGER REFERENCES meeting_slots(id),
   user_id INTEGER REFERENCES users(id),
-  response VARCHAR(10) CHECK (response IN ('accepté', 'refusé'))
+  response TEXT CHECK (response IN ('accepté', 'refusé')),
+  UNIQUE(slot_id, user_id)
+);
+
+
+CREATE TABLE pending_invitations (
+  id SERIAL PRIMARY KEY,
+  meeting_id INTEGER REFERENCES meetings(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  invited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

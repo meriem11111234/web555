@@ -4,14 +4,14 @@
 
   <form action="/create-meeting" method="POST" class="form-container">
     <input type="text" name="title" placeholder="Titre de la réunion" required class="input-field" />
+
     <textarea name="description" placeholder="Description" required class="input-field" rows="4"></textarea>
 
-    <!-- Sélecteur de participants -->
-    <select name="invitedUsers[]" class="input-field" multiple>
-      <% allUsers.forEach(function(u) { if (u.id !== user.id) { %>
-        <option value="<%= u.id %>"><%= u.first_name %> <%= u.last_name %> (<%= u.email %>)</option>
-      <% }}); %>
-    </select>
+    <!-- Champ pour saisir les emails invités -->
+    <label for="invitedEmails">Inviter des utilisateurs</label>
+    <textarea name="invitedEmails" placeholder="Entrez les emails des invités séparés par des virgules (ex: jean@mail.com, lea@mail.com)" class="input-field" rows="3" required></textarea>
+    <small>⚠️ Sépare les adresses email par des virgules</small>
+
     <h3>Créneaux proposés</h3>
     <div id="slots-container">
       <div class="slot-row">
@@ -20,6 +20,7 @@
       </div>
     </div>
     <button type="button" onclick="addSlot()">+ Ajouter un créneau</button>
+
     <div class="button-container">
       <button type="submit" class="button">Créer la réunion</button>
       <a href="/dashboard" class="button">Retour</a>

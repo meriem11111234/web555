@@ -1,32 +1,37 @@
-<% if (page === 'meeting' && user) { %>
+<% if (page === 'meeting') { %>
   <h2>Réunion</h2>
   <p>Bienvenue dans la réunion <strong><%= meeting.title %></strong> (code : <%= meeting.code %>)</p>
 
   <h3>Participants :</h3>
   <ul>
-    <% participants.forEach(function(participant) { %>
-      <% if (participant.response !== 'organisateur') { %>
-        <li><%= participant.first_name %> <%= participant.last_name %> - <%= participant.response %></li>
-      <% } %>
+    <% pendingInvitations.forEach(function(invite) { 
+         const user = participants.find(p => p.email === invite.email);
+         const acceptedSlot = allSlotResponses.find(r => r.response === 'accepté' && user && r.user_id === user.id);
+  
+         const nonUserSlot = allSlotResponses.find(r => r.response === 'accepté' && r.user_id === null && r.email === invite.email);
+    %>
+      <li>
+        <%= invite.email %> :
+        <% if (acceptedSlot || nonUserSlot) { %>
+          accepté — créneau : 
+          <%= new Date(slots.find(s => s.id === (acceptedSlot?.slot_id || nonUserSlot?.slot_id)).start_time).toLocaleString() %>
+        <% } else { %>
+          en attente
+        <% } %>
+      </li>
     <% }); %>
   </ul>
+  
 
   <p>
     Partagez ce lien pour rejoindre la réunion :
     <a href="/meeting/code/<%= meeting.code %>">Lien de la réunion</a>
   </p>
 
-  <h3>Disponibilités des participants :</h3>
-  <ul>
-    <% meetingAvailabilities.forEach(function(a) { %>
-      <li><%= a.first_name %> <%= a.last_name %> : de <%= new Date(a.start_time).toLocaleString() %> à <%= new Date(a.end_time).toLocaleString() %></li>
-    <% }); %>
-  </ul>
-
   <h3>Créneaux proposés :</h3>
 
-  <% if (meeting.creator_id === user.id) { %>
-    <!-- ORGANISATEUR : VOIT LES RÉPONSES SAUF LA SIENNE -->
+  <% if (meeting.creator_id === (user?.id)) { %>
+    <!-- ORGANISATEUR : VOIT LES RÉPONSES -->
     <% slots.forEach(function(slot) { %>
       <div style="margin-bottom: 1em;">
         <strong><%= new Date(slot.start_time).toLocaleString() %> - <%= new Date(slot.end_time).toLocaleString() %></strong>
@@ -39,6 +44,8 @@
               <%= p.first_name %> <%= p.last_name %> :
               <% if (response && response.response === 'accepté') { %>
                 accepté (<%= new Date(slot.start_time).toLocaleTimeString() %> - <%= new Date(slot.end_time).toLocaleTimeString() %>)
+              <% } else if (response && response.response === 'refusé') { %>
+                refusé
               <% } else { %>
                 en attente
               <% } %>
@@ -47,9 +54,14 @@
         </ul>
       </div>
     <% }); %>
+
   <% } else { %>
-    <!-- PARTICIPANT -->
+    <!-- PARTICIPANT CONNECTÉ OU NON -->
     <form id="slot-response-form">
+      <% if (!user) { %>
+        <input type="email" name="email" placeholder="Entrez votre email pour répondre" required style="margin-bottom: 10px;" />
+      <% } %>
+
       <% slots.forEach(function(slot) { %>
         <div style="margin-bottom: 1em;" data-slot-id="<%= slot.id %>">
           <label>
@@ -63,40 +75,70 @@
           </label>
         </div>
       <% }); %>
+
       <input type="hidden" name="meeting_id" value="<%= meeting.id %>">
-      <button type="submit">Envoyer ma réponse</button>
+      <button type="submit">Accepter</button>
+      <button type="button" id="reject-btn">Refuser l'invitation</button>
     </form>
 
     <script>
       document.getElementById("slot-response-form").addEventListener("submit", async function (e) {
         e.preventDefault();
-
         const form = e.target;
         const acceptedSlotId = form.querySelector('input[name="accepted_slot_id"]:checked')?.value;
         const meetingId = form.querySelector('input[name="meeting_id"]').value;
+        const emailInput = form.querySelector('input[name="email"]');
+        const email = emailInput ? emailInput.value : null;
 
         if (!acceptedSlotId) return alert("Veuillez choisir un créneau.");
 
         try {
-          const response = await fetch("/api/slot-response", {
+          const res = await fetch("/api/slot-response", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               meeting_id: meetingId,
               accepted_slot_id: acceptedSlotId,
-            }),
+              email: email
+            })
           });
 
-          if (response.ok) {
-            // Réinitialise tous les statuts
-            document.querySelectorAll(".response-status").forEach(el => el.textContent = "");
-            document.querySelector(`div[data-slot-id="${acceptedSlotId}"] .response-status`).textContent = " — accepté";
+          if (res.ok) {
+            alert("Réponse enregistrée !");
+            location.reload();
           } else {
-            alert("Erreur lors de l'enregistrement.");
+            alert("Erreur lors de l'enregistrement !");
           }
         } catch (err) {
           console.error(err);
-          alert("Erreur réseau");
+          alert("Erreur réseau !");
+        }
+      });
+
+      document.getElementById("reject-btn").addEventListener("click", async function () {
+        const meetingId = document.querySelector('input[name="meeting_id"]').value;
+        const emailInput = document.querySelector('input[name="email"]');
+        const email = emailInput ? emailInput.value : null;
+
+        const confirmed = confirm("Voulez-vous vraiment refuser l'invitation ?");
+        if (!confirmed) return;
+
+        try {
+          const res = await fetch("/api/slot-response/reject", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ meeting_id: meetingId, email })
+          });
+
+          if (res.ok) {
+            alert("Invitation refusée.");
+            location.reload();
+          } else {
+            alert("Erreur lors du refus.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Erreur réseau.");
         }
       });
     </script>
@@ -104,4 +146,3 @@
 
   <a href="/dashboard" class="button">Quitter cette réunion</a>
 <% } %>
-

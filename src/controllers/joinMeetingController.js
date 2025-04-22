@@ -40,7 +40,6 @@ const joinMeeting = async (req, res) => {
 
 // Afficher la page "rejoindre une réunion"
 const renderJoinMeetingPage = (req, res) => {
-  if (!req.session.user) return res.redirect("/login");  //Si l'utilisateur n'est pas connecté , on le redirige vers login
   res.render("index", { page: "join-meeting", user: req.session.user });
 };
 

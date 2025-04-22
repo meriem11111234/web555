@@ -4,6 +4,8 @@ const {
   createMeeting,
   renderCreateMeetingPage,
   getMeetingDetails,
+  showInvitationPage,
+  respondToInvitation
 } = require("../controllers/meetingController");
 
 // Route pour afficher la page de création
@@ -17,5 +19,9 @@ router.post("/", createMeeting);
 
 // Route pour afficher une réunion par code
 router.get("/meeting/code/:code", getMeetingDetails);
+router.get("/invitation", showInvitationPage);
+router.post("/invitation/respond", respondToInvitation);
+
+
 
 module.exports = router;

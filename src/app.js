@@ -46,7 +46,6 @@ app.use("/availabilities", availabilityRoutes);
 const slotResponseRoutes = require("./routes/slotResponseRoutes");
 app.use("/api/slot-response", slotResponseRoutes);
 app.get("/ajouter-disponibilite", async (req, res) => {
-  if (!req.session.user) return res.redirect("/login");
 
   try {
     const user_id = req.session.user.id;

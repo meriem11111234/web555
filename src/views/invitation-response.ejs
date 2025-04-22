@@ -1,0 +1,21 @@
+<h2>Réunion</h2>
+<p>Vous êtes invité à la réunion <strong><%= meeting.title %></strong></p>
+
+<h3>Choisissez un créneau :</h3>
+<form method="POST" action="/invitation/respond">
+  <% slots.forEach(slot => { %>
+    <div>
+      <label>
+        <input type="radio" name="slot_id" value="<%= slot.id %>" 
+          <% if (responses[slot.id] === 'accepté') { %> checked <% } %>
+        >
+        <%= new Date(slot.start_time).toLocaleString() %> - 
+        <%= new Date(slot.end_time).toLocaleString() %>
+      </label>
+    </div>
+  <% }) %>
+
+  <input type="hidden" name="meeting_id" value="<%= meeting.id %>">
+  <input type="hidden" name="email" value="<%= email %>">
+  <button type="submit">Valider ma participation</button>
+</form>
