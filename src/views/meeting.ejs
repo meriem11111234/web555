@@ -77,6 +77,21 @@
           </div>
         <% }); %>
 
+        <% if (user && user.role !== 'invité') { %>
+          <h3>Mes disponibilités :</h3>
+          <ul>
+            <% if (userAvailabilities.length === 0) { %>
+              <li>Aucune disponibilité enregistrée.</li>
+            <% } else { %>
+              <% userAvailabilities.forEach(function(avail) { %>
+                <li><%= new Date(avail.start_time).toLocaleString() %> - <%= new Date(avail.end_time).toLocaleString() %></li>
+              <% }); %>
+            <% } %>
+          </ul>
+        <% } %>
+        
+
+
         <input type="hidden" name="meeting_id" value="<%= meeting.id %>">
         <button type="submit">Accepter</button>
         <button type="button" id="reject-btn">Refuser l'invitation</button>

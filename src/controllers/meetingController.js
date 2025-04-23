@@ -168,18 +168,29 @@ WHERE sr.slot_id IN (SELECT id FROM meeting_slots WHERE meeting_id = $1)
     const allSlotResponses = allSlotResponsesResult.rows;
     const pendingInvitations = pendingInvitationsResult.rows;
 
-    res.render("index", {
-      page: "meeting",
-      meeting,
-      participants: participantsResult.rows,
-      user: currentUser,
-      slots,
-      userResponses,
-      allSlotResponses,
-      pendingInvitations,
-      participantView // 👈 ici
-    });
-    
+    let userAvailabilities = [];
+
+if (currentUser && currentUser.role !== 'invité') {
+  const availRes = await pool.query(
+    "SELECT start_time, end_time FROM availabilities WHERE user_id = $1 ORDER BY start_time",
+    [currentUser.id]
+  );
+  userAvailabilities = availRes.rows;
+}
+
+res.render("index", {
+  page: "meeting",
+  meeting,
+  participants: participantsResult.rows,
+  user: currentUser,
+  slots,
+  userResponses,
+  allSlotResponses,
+  pendingInvitations,
+  participantView,
+  userAvailabilities
+});
+
     
 
   } catch (error) {
