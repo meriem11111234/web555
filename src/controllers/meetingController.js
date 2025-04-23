@@ -76,7 +76,7 @@ const createMeeting = async (req, res) => {
           subject: "Invitation à une réunion",
           text: `Vous êtes invité(e) à une réunion : ${title}
         
-        Cliquez ici pour y accéder : http://localhost:3000/invitation?code=${code}&email=${encodeURIComponent(email)}`
+        Cliquez ici pour y accéder : http://localhost:3000/meeting/code/${code}`
         });
         
 
@@ -103,13 +103,28 @@ const createMeeting = async (req, res) => {
 
 const getMeetingDetails = async (req, res) => {
   const meetingCode = req.params.code;
+  const emailQuery = req.query.email;
+  let currentUser = req.session.user;
+  const participantView = req.query.participantView === 'true';
 
   try {
     const meetingResult = await pool.query("SELECT * FROM meetings WHERE code = $1", [meetingCode]);
     const meeting = meetingResult.rows[0];
 
     if (!meeting) {
-      return res.status(404).render("index", { page: "meeting", error: "Réunion non trouvée" });
+      return res.status(404).render("index", {
+        page: "home",
+        user: req.session.user || null,
+        error: "Réunion non trouvée"
+      });
+    }
+
+    // Si l'utilisateur n'est pas connecté mais un email est présent dans l'URL
+    if (!currentUser && emailQuery) {
+      const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [emailQuery]);
+      if (userResult.rows.length > 0) {
+        currentUser = userResult.rows[0];
+      }
     }
 
     const participantsResult = await pool.query(`
@@ -124,16 +139,19 @@ const getMeetingDetails = async (req, res) => {
       [meeting.id]
     );
 
-    const slotResponsesResult = await pool.query(`
-      SELECT slot_id, user_id, response 
-      FROM slot_responses 
-      WHERE user_id = $1
-    `, [req.session.user.id]);
+    const slotResponsesResult = currentUser
+      ? await pool.query(`
+          SELECT slot_id, user_id, response 
+          FROM slot_responses 
+          WHERE user_id = $1
+        `, [currentUser.id])
+      : { rows: [] };
 
     const allSlotResponsesResult = await pool.query(`
-      SELECT slot_id, user_id, response 
-      FROM slot_responses 
-      WHERE slot_id IN (SELECT id FROM meeting_slots WHERE meeting_id = $1)
+      SELECT sr.slot_id, sr.user_id, u.email, sr.response 
+FROM slot_responses sr
+LEFT JOIN users u ON sr.user_id = u.id
+WHERE sr.slot_id IN (SELECT id FROM meeting_slots WHERE meeting_id = $1)
     `, [meeting.id]);
 
     const pendingInvitationsResult = await pool.query(
@@ -154,19 +172,27 @@ const getMeetingDetails = async (req, res) => {
       page: "meeting",
       meeting,
       participants: participantsResult.rows,
-      user: currentUser, // PAS req.session.user
+      user: currentUser,
       slots,
       userResponses,
       allSlotResponses,
-      pendingInvitations
+      pendingInvitations,
+      participantView // 👈 ici
     });
     
     
+
   } catch (error) {
-    console.error("Erreur : récupération des détails de la réunion :", error);
-    res.status(500).render("index", { page: "meeting", error: "Erreur interne du serveur !" });
+    console.error("❌ Erreur getMeetingDetails :", error);
+    res.status(500).render("index", {
+      page: "home",
+      user: req.session.user || null,
+      error: "Erreur interne du serveur !"
+    });
   }
 };
+
+
 
 
 const renderCreateMeetingPage = async (req, res) => {
@@ -196,7 +222,18 @@ const showInvitationPage = async (req, res) => {
   try {
     const meetingResult = await pool.query("SELECT * FROM meetings WHERE code = $1", [code]);
     const meeting = meetingResult.rows[0];
-    if (!meeting) return res.status(404).send("Réunion introuvable");
+    if (!meeting) return res.status(404).render("index", {
+      page: "meeting",
+      meeting: null,
+      participants: [],
+      user: null,
+      slots: [],
+      userResponses: {},
+      allSlotResponses: [],
+      pendingInvitations: [],
+      error: "Réunion non trouvée"
+    });
+    
 
     const slotsResult = await pool.query("SELECT * FROM meeting_slots WHERE meeting_id = $1", [meeting.id]);
     const slots = slotsResult.rows;
@@ -258,6 +295,7 @@ const respondToInvitation = async (req, res) => {
  // Récupérer le code de la réunion
 const codeResult = await pool.query("SELECT code FROM meetings WHERE id = $1", [meeting_id]);
 const code = codeResult.rows[0].code;
+return res.redirect(`/meeting/code/${code}?participantView=true`);
 
 // Répondre avec un lien cliquable
 res.send(`
