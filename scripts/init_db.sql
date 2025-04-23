@@ -67,7 +67,7 @@ CREATE TABLE slot_responses (
   id SERIAL PRIMARY KEY,
   slot_id INTEGER REFERENCES meeting_slots(id),
   user_id INTEGER REFERENCES users(id),
-  response TEXT CHECK (response IN ('accepté', 'refusé')),
+  response TEXT,
   UNIQUE(slot_id, user_id)
 );
 

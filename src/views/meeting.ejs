@@ -2,7 +2,7 @@
 
   <% if (participantView) { %>
     <h2>Bienvenue dans la réunion <%= meeting.title %></h2>
-    <p>Merci d’avoir accepté l’invitation.</p>
+    <p>Merci d’avoir accepte l’invitation.</p>
 
     
 
@@ -13,18 +13,29 @@
     <p>Bienvenue dans la réunion <strong><%= meeting.title %></strong> (code : <%= meeting.code %>)</p>
 
     <h3>Participants :</h3>
-    <ul>
-      <% pendingInvitations.forEach(function(invite) { 
-           const user = participants.find(p => p.email === invite.email);
-           const acceptedSlot = allSlotResponses.find(r => r.response === 'accepté' && user && r.user_id === user.id);
-           const nonUserSlot = allSlotResponses.find(r => r.response === 'accepté' && r.user_id === null && r.email === invite.email);
-      %>
-        <li>
-          <%= invite.email %> 
-         
-        </li>
-      <% }); %>
-    </ul>
+<ul>
+  <% pendingInvitations.forEach(function(invite) { 
+       const user = participants.find(p => p.email === invite.email);
+       const acceptedSlot = allSlotResponses.find(r => r.response === 'accepte' && user && r.user_id === user.id);
+       const nonUserSlot = allSlotResponses.find(r => r.response === 'accepte' && r.user_id === null && r.email === invite.email);
+       const acceptedSlotId = acceptedSlot?.slot_id || nonUserSlot?.slot_id;
+       const slotInfo = slots.find(s => s.id === acceptedSlotId);
+  %>
+    <li>
+      <%= invite.email %>
+      <% if (acceptedSlot || nonUserSlot) { %>
+        — <strong>accepte</strong>
+        <% if (slotInfo) { %>
+          — créneau :
+          <%= new Date(slotInfo.start_time).toLocaleString() %> - <%= new Date(slotInfo.end_time).toLocaleTimeString() %>
+        <% } %>
+      <% } else { %>
+        — <em>en attente</em>
+      <% } %>
+    </li>
+  <% }); %>
+</ul>
+
 
     <p>
       Partagez ce lien pour rejoindre la réunion :
@@ -58,11 +69,11 @@
           <div style="margin-bottom: 1em;" data-slot-id="<%= slot.id %>">
             <label>
               <input type="radio" name="accepted_slot_id" value="<%= slot.id %>"
-                <% if (userResponses && userResponses[slot.id] === 'accepté') { %> checked <% } %> 
+                <% if (userResponses && userResponses[slot.id] === 'accepte') { %> checked <% } %> 
               >
               <strong><%= new Date(slot.start_time).toLocaleString() %> - <%= new Date(slot.end_time).toLocaleString() %></strong>
               <span class="response-status">
-                <% if (userResponses && userResponses[slot.id] === 'accepté') { %> — accepté <% } %>
+                <% if (userResponses && userResponses[slot.id] === 'accepte') { %> — accepte <% } %>
               </span>
             </label>
           </div>
@@ -139,7 +150,7 @@
             });
 
             if (res.ok) {
-              alert("Invitation refusée.");
+              alert("Invitation refusee.");
               location.reload();
             } else {
               alert("Erreur lors du refus.");

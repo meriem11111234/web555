@@ -8,7 +8,7 @@ router.post("/", async (req, res) => {
 
     const { meeting_id, accepted_slot_id, email, responseType } = req.body;
 
-    if (!meeting_id || (!accepted_slot_id && responseType !== "refusé")) {
+    if (!meeting_id || (!accepted_slot_id && responseType !== "refuse")) {
       console.log("❌ Données manquantes !");
       return res.status(400).json({ message: "Données manquantes" });
     }
@@ -57,24 +57,22 @@ router.post("/", async (req, res) => {
     );
     console.log("🧹 Anciennes réponses supprimées pour cet utilisateur.");
 
-    // ❌ Si refusé, on s'arrête ici
-    if (responseType === "refusé") {
-      console.log("🚫 Invitation refusée.");
-      return res.status(200).json({ message: "Invitation refusée." });
+    // ❌ Si refuse, on s'arrête ici
+    if (responseType === "refuse") {
+      console.log("🚫 Invitation refusee.");
+      return res.status(200).json({ message: "Invitation refusee." });
     }
 
     const codeResult = await pool.query("SELECT code FROM meetings WHERE id = $1", [meeting_id]);
 const code = codeResult.rows[0].code;
 
-return res.status(200).json({ message: "Réponse enregistrée !", code });
-
 
     // ✅ Enregistrer la nouvelle réponse
     await pool.query(
-      "INSERT INTO slot_responses (slot_id, user_id, response) VALUES ($1, $2, 'accepté')",
+      "INSERT INTO slot_responses (slot_id, user_id, response) VALUES ($1, $2, 'accepte')",
       [accepted_slot_id, userId]
     );
-    console.log("✅ Créneau accepté enregistré pour slot :", accepted_slot_id);
+    console.log("✅ Créneau accepte enregistré pour slot :", accepted_slot_id);
 
     return res.status(200).json({ message: "Réponse enregistrée !" });
   } catch (err) {
@@ -94,6 +92,7 @@ router.post("/reject", async (req, res) => {
     } else if (email) {
       const userResult = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
       if (userResult.rows.length > 0) {
+
         userId = userResult.rows[0].id;
       }
     }
@@ -109,7 +108,7 @@ router.post("/reject", async (req, res) => {
       AND slot_id IN (SELECT id FROM meeting_slots WHERE meeting_id = $2)
     `, userId ? [userId, meeting_id] : [email, meeting_id]);
 
-    return res.status(200).json({ message: "Invitation refusée." });
+    return res.status(200).json({ message: "Invitation refusee." });
 
   } catch (err) {
     console.error("❌ Erreur slot-response/reject:", err);
