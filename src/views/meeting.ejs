@@ -42,16 +42,7 @@
               if (p.response !== 'organisateur') {
                 const response = allSlotResponses?.find(r => r.slot_id === slot.id && r.user_id === p.id);
             %>
-              <li>
-                <%= p.first_name %> <%= p.last_name %> :
-                <% if (response && response.response === 'accepté') { %>
-                  accepté (<%= new Date(slot.start_time).toLocaleTimeString() %> - <%= new Date(slot.end_time).toLocaleTimeString() %>)
-                <% } else if (response && response.response === 'refusé') { %>
-                  refusé
-                <% } else { %>
-                  en attente
-                <% } %>
-              </li>
+              
             <% } }); %>
           </ul>
         </div>
