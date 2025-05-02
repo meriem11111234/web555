@@ -23,8 +23,10 @@
   %>
     <li>
       <%= invite.email %>
-      <% if (acceptedSlot || nonUserSlot) { %>
-        — <strong>accepte</strong>
+      <% if (invite.response === 'refuse') { %>
+        — <strong style="color: red;">refusé</strong>
+      <% } else if (acceptedSlot || nonUserSlot) { %>
+        — <strong>accepté</strong>
         <% if (slotInfo) { %>
           — créneau :
           <%= new Date(slotInfo.start_time).toLocaleString() %> - <%= new Date(slotInfo.end_time).toLocaleTimeString() %>
@@ -32,6 +34,7 @@
       <% } else { %>
         — <em>en attente</em>
       <% } %>
+      
     </li>
   <% }); %>
 </ul>
@@ -135,31 +138,41 @@
         });
 
         document.getElementById("reject-btn").addEventListener("click", async function () {
-          const meetingId = document.querySelector('input[name="meeting_id"]').value;
-          const emailInput = document.querySelector('input[name="email"]');
-          const email = emailInput ? emailInput.value : null;
+  const meetingId = document.querySelector('input[name="meeting_id"]')?.value;
+  const emailInput = document.querySelector('input[name="email"]');
+  const email = emailInput ? emailInput.value : null;
 
-          const confirmed = confirm("Voulez-vous vraiment refuser l'invitation ?");
-          if (!confirmed) return;
+  if (!meetingId) {
+    alert("Meeting ID manquant !");
+    return;
+  }
 
-          try {
-            const res = await fetch("/api/slot-response/reject", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ meeting_id: meetingId, email })
-            });
+  const confirmed = confirm("Voulez-vous vraiment refuser l'invitation ?");
+  if (!confirmed) return;
 
-            if (res.ok) {
-              alert("Invitation refusee.");
-              location.reload();
-            } else {
-              alert("Erreur lors du refus.");
-            }
-          } catch (err) {
-            console.error(err);
-            alert("Erreur réseau.");
-          }
-        });
+  try {
+    const payload = { meeting_id: meetingId };
+    if (email) payload.email = email;
+
+    const res = await fetch("/api/slot-response/reject", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      alert("Invitation refusée.");
+      location.reload();
+    } else {
+      const result = await res.json();
+      alert("Erreur : " + result.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erreur réseau.");
+  }
+});
+
       </script>
     <% } %>
 

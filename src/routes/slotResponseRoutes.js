@@ -81,39 +81,70 @@ const code = codeResult.rows[0].code;
   }
 });
 
-
 router.post("/reject", async (req, res) => {
   try {
     const { meeting_id, email } = req.body;
 
+    console.log("📩 Requête rejet reçue :", req.body);
+
+    if (!meeting_id) {
+      return res.status(400).json({ message: "meeting_id manquant" });
+    }
+
     let userId = null;
+
     if (req.session.user) {
       userId = req.session.user.id;
     } else if (email) {
+      // 🔍 Vérifie si l'utilisateur existe
       const userResult = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
       if (userResult.rows.length > 0) {
-
         userId = userResult.rows[0].id;
+        console.log("👤 Utilisateur invité trouvé :", userId);
+      } else {
+        // ➕ Sinon, créer un utilisateur invité
+        const newUser = await pool.query(
+          "INSERT INTO users (email, first_name, last_name, password, role) VALUES ($1, '', '', '', 'invité') RETURNING id",
+          [email]
+        );
+        userId = newUser.rows[0].id;
+        console.log("➕ Nouvel utilisateur invité créé :", userId);
       }
     }
 
-    if (!userId && !email) {
-      return res.status(400).json({ message: "Email ou utilisateur requis" });
+    if (!userId) {
+      return res.status(400).json({ message: "Utilisateur non trouvé" });
     }
 
-    // Supprimer toutes les réponses précédentes pour ce meeting
-    await pool.query(`
-      DELETE FROM slot_responses 
-      WHERE ${userId ? "user_id = $1" : "email = $1"} 
-      AND slot_id IN (SELECT id FROM meeting_slots WHERE meeting_id = $2)
-    `, userId ? [userId, meeting_id] : [email, meeting_id]);
+    const existing = await pool.query(
+      "SELECT * FROM meeting_participants WHERE meeting_id = $1 AND user_id = $2",
+      [meeting_id, userId]
+    );
+    
+    if (existing.rows.length === 0) {
+      await pool.query(
+        "INSERT INTO meeting_participants (meeting_id, user_id, response) VALUES ($1, $2, 'refuse')",
+        [meeting_id, userId]
+      );
+      console.log("➕ Participant ajouté avec statut 'refuse'.");
+    } else {
+      await pool.query(`
+        UPDATE meeting_participants
+        SET response = 'refuse'
+        WHERE meeting_id = $1 AND user_id = $2
+      `, [meeting_id, userId]);
+      console.log(`🛑 Statut mis à 'refuse' pour user_id = ${userId}`);
+    }
+        
 
-    return res.status(200).json({ message: "Invitation refusee." });
+    return res.status(200).json({ message: "Invitation refusée." });
 
   } catch (err) {
     console.error("❌ Erreur slot-response/reject:", err);
     return res.status(500).json({ message: "Erreur serveur" });
   }
 });
+
+
 
 module.exports = router;

@@ -154,10 +154,15 @@ LEFT JOIN users u ON sr.user_id = u.id
 WHERE sr.slot_id IN (SELECT id FROM meeting_slots WHERE meeting_id = $1)
     `, [meeting.id]);
 
-    const pendingInvitationsResult = await pool.query(
-      "SELECT email FROM pending_invitations WHERE meeting_id = $1",
-      [meeting.id]
-    );
+    const pendingInvitationsResult = await pool.query(`
+      SELECT pi.email, mp.response
+      FROM pending_invitations pi
+      LEFT JOIN users u ON u.email = pi.email
+      LEFT JOIN meeting_participants mp ON mp.user_id = u.id AND mp.meeting_id = pi.meeting_id
+      WHERE pi.meeting_id = $1
+    `, [meeting.id]);
+    const pendingInvitations = pendingInvitationsResult.rows;
+    
 
     const slots = slotsResult.rows;
     const userResponses = {};
@@ -166,7 +171,6 @@ WHERE sr.slot_id IN (SELECT id FROM meeting_slots WHERE meeting_id = $1)
     });
 
     const allSlotResponses = allSlotResponsesResult.rows;
-    const pendingInvitations = pendingInvitationsResult.rows;
 
     let userAvailabilities = [];
 
